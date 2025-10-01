@@ -34,7 +34,7 @@ void AMHGAPlayerController::BeginPlay()
 
 		} else {
 
-			UE_LOG(LogMHGA, Error, TEXT("Could not spawn mobile controls widget."));
+			UE_LOG(MHGA, Error, TEXT("Could not spawn mobile controls widget."));
 
 		}
 
