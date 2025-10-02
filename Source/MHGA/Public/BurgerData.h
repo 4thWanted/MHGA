@@ -24,7 +24,7 @@ enum class EIngredient : uint8
 UENUM(BlueprintType)
 enum class EBurgerMenu : uint8
 {
-	WrongBurger			UMETA(DisplayName = "WrongBurger")
+	WrongBurger			UMETA(DisplayName = "WrongBurger"),
 	BigMac				UMETA(DisplayName = "BigMac"),
 	BTD					UMETA(DisplayName = "BTD"),
 	QPC					UMETA(DisplayName = "QPC"),
