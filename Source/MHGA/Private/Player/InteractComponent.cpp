@@ -4,6 +4,7 @@
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Player/MHGACharacter.h"
 #include "Camera/CameraComponent.h"
+#include "GrabableProps.h"
 
 UInteractComponent::UInteractComponent()
 {
@@ -50,6 +51,10 @@ void UInteractComponent::GrabProps()
 		//PRINTLOG(TEXT("%s"), *Hit.GetActor()->GetActorNameOrLabel());
 		if (Hit.GetComponent()->IsSimulatingPhysics())
 		{
+			IGrabableProps* GrabInterface = Cast<IGrabableProps>(Hit.GetActor());
+			if (GrabInterface == nullptr)
+				return;
+			
 			UPrimitiveComponent* HitComp = Hit.GetComponent();
 			HitComp->WakeAllRigidBodies();
 			PhysicsHandle->GrabComponentAtLocationWithRotation(
@@ -60,6 +65,8 @@ void UInteractComponent::GrabProps()
 			);
 
 			bIsGrabbed = true;
+			GrabInterface->OnGrabbed();
+			
 			PRINTLOG(TEXT("GRAB!"));
 		}
 	}
