@@ -22,20 +22,29 @@ protected:
 private:
 	EBurgerMenu CheckIngredients();
 
+	// 배열을 맵으로 변환
+	TMap<EIngredient, int32> MakeMapFromArray(const TArray<FIngredientStack>& InArray);
+
+	// Data테이블의 레시피 매칭
+	// 성공하면 EBurgerMenu BurgerName 반환, 실패하면 EBurgerMenu::WrongBurger
+	EBurgerMenu FindMatchingRecipe(UDataTable* DT, const TArray<FIngredientStack>& WrapperIngr);
+
 	
 /* Field */
 public:
+	UPROPERTY(EditAnywhere)
+	class UDataTable* BurgerDataTable;
 
 
 protected:
 
 
 private:
+	
 	UPROPERTY()
 	class UBoxComponent* Collision;
-	float DetectRange;
 
 	UPROPERTY()
-	TMap<EIngredient, int32> OnArea;
+	TArray<FIngredientStack> OnAreaIngredients;
 	
 };

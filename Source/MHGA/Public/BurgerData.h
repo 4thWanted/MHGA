@@ -33,6 +33,18 @@ enum class EBurgerMenu : uint8
 };
 
 USTRUCT(BlueprintType)
+struct FIngredientStack
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    EIngredient  IngredientId;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 Quantity = 0;
+};
+
+USTRUCT(BlueprintType)
 struct FBurgerRecipe : public FTableRowBase
 {
 	GENERATED_BODY()
@@ -41,5 +53,5 @@ public:
 	EBurgerMenu BurgerName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<EIngredient, int32> IngredientsMap;
+	TArray<FIngredientStack> Ingredients;
 };
