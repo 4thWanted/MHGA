@@ -20,4 +20,8 @@ class MHGA_API IGrabableProps
 public:
 	UFUNCTION(Category="GrabComp")
 	virtual void OnGrabbed() = 0;
+	UFUNCTION(Category="GrabComp")
+	virtual void OnPut() = 0;
+	UFUNCTION(Category="GrabComp")
+	virtual void OnUse() = 0;
 };

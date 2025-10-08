@@ -65,9 +65,8 @@ void UInteractComponent::GrabProps()
 			);
 
 			bIsGrabbed = true;
+			GrabbedProp = GrabInterface;
 			GrabInterface->OnGrabbed();
-			
-			PRINTLOG(TEXT("GRAB!"));
 		}
 	}
 	
@@ -77,9 +76,11 @@ void UInteractComponent::PutProps()
 {
 	if (PhysicsHandle->GrabbedComponent)
 	{
+		GrabbedProp->OnPut();
+		
 		PhysicsHandle->ReleaseComponent();
 		bIsGrabbed = false;
-		PRINTLOG(TEXT("PUT!"));
+		GrabbedProp = nullptr;
 	}
 }
 
@@ -93,5 +94,8 @@ void UInteractComponent::InteractProps()
 
 void UInteractComponent::UseProps()
 {
-	PRINTLOG(TEXT("USE!"));
+	if (bIsGrabbed && GrabbedProp)
+	{
+		GrabbedProp->OnUse();
+	}
 }

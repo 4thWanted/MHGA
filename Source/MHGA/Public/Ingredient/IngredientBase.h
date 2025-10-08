@@ -31,4 +31,6 @@ protected:
 	
 public:
 	virtual void OnGrabbed() override;
+	virtual void OnPut() override;
+	virtual void OnUse() override;
 };

@@ -3,6 +3,8 @@
 
 #include "Ingredient/IngredientBase.h"
 
+#include "MHGA.h"
+
 
 AIngredientBase::AIngredientBase()
 {
@@ -27,5 +29,16 @@ void AIngredientBase::Tick(float DeltaTime)
 
 void AIngredientBase::OnGrabbed()
 {
+	PRINTLOG(TEXT("GRAB!"));
+}
+
+void AIngredientBase::OnPut()
+{
+	PRINTLOG(TEXT("PUT!"));
+}
+
+void AIngredientBase::OnUse()
+{
+	PRINTLOG(TEXT("USE!"));
 }
 

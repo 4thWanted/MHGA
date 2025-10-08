@@ -9,6 +9,8 @@
 
 class AMHGACharacter;
 class UPhysicsHandleComponent;
+class IGrabableProps;
+class UGrabableProps;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class MHGA_API UInteractComponent : public UActorComponent
@@ -38,8 +40,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Grab")
 	float GrabRadius = 20.f; // 구체 트레이스 반경
 
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Grab")
 	bool bIsGrabbed = false;
+	IGrabableProps* GrabbedProp;
 
 protected:
 	void GrabProps();

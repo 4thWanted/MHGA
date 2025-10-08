@@ -8,6 +8,7 @@
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 #include "MHGA.h"
+#include "Components/WidgetInteractionComponent.h"
 #include "Player/InteractComponent.h"
 
 AMHGACharacter::AMHGACharacter()
@@ -38,7 +39,16 @@ AMHGACharacter::AMHGACharacter()
 	//comps
 	InteractComponent = CreateDefaultSubobject<UInteractComponent>(TEXT("InteractComponent"));
 	
+	WidgetInteraction = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("WidgetInteraction"));
+	WidgetInteraction->SetupAttachment(FirstPersonCameraComponent);
+	WidgetInteraction->InteractionDistance = 200.f;
+	// 디버그 라인 표시 (테스트용)
+	WidgetInteraction->bShowDebug = true;
+	WidgetInteraction->DebugLineThickness = 0.1f;
 
+
+
+	
 	//////////////////////////////////Input///////////////////////////////
 	ConstructorHelpers::FObjectFinder<UInputAction> move(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Move.IA_Move'"));
 	if (move.Succeeded())
@@ -97,5 +107,9 @@ void AMHGACharacter::PickInput(const FInputActionValue& Value)
 
 void AMHGACharacter::UseInput(const FInputActionValue& Value)
 {
+	//3d ui interact press
+	WidgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
+
+	//use prop
 	InteractComponent->UseProps();
 }

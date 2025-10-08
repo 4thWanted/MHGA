@@ -7,6 +7,7 @@
 #include "Logging/LogMacros.h"
 #include "MHGACharacter.generated.h"
 
+class UWidgetInteractionComponent;
 class UInteractComponent;
 class UInputComponent;
 class USkeletalMeshComponent;
@@ -50,7 +51,8 @@ protected:
 	//comps
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	UInteractComponent* InteractComponent;
-	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UWidgetInteractionComponent* WidgetInteraction; //3d widget interact
 
 
 
