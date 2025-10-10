@@ -19,9 +19,9 @@ void UMenuButtonUI::OnClickedMenu()
 	PRINTLOG(TEXT("OnClickedMenu"));
 }
 
-void UMenuButtonUI::Init(const FString& InName, UCounterUI* InOwner)
+void UMenuButtonUI::Init(const EBurgerMenu InName, UCounterUI* InOwner)
 {
 	MenuName = InName;
 	CounterUI = InOwner;
-	TEXT_MenuName->SetText(FText::FromString(MenuName));
+	TEXT_MenuName->SetText(StaticEnum<EBurgerMenu>()->GetDisplayNameTextByValue(static_cast<int64>(MenuName)));
 }

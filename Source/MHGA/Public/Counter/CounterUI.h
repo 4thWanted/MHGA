@@ -12,6 +12,8 @@ class UMenuButtonUI;
 class UButton;
 class UTextBlock;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnClickOrder, TArray<EBurgerMenu>, Menus);
+
 UCLASS()
 class MHGA_API UCounterUI : public UUserWidget
 {
@@ -37,9 +39,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UMenuButtonUI> MenuButtonClass;
 
+	//OrderList
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<EBurgerMenu> OrderList;
+	
+public:
+	FOnClickOrder OnClickOrderDelegate;
+	
 public:
 	UFUNCTION(BlueprintCallable)
-	void AddMenuToList(const FString& MenuName);
+	void AddMenuToList(const EBurgerMenu MenuName);
 	UFUNCTION(BlueprintCallable)
 	void OrderMenu();
 	UFUNCTION(BlueprintCallable)

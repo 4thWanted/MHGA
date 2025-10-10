@@ -33,13 +33,11 @@ void UCounterUI::NativeConstruct()
 
 		if (MenuValue == EBurgerMenu::None || MenuValue == EBurgerMenu::WrongBurger)
 			continue;
-
-		FString NameString = EnumPtr->GetDisplayNameTextByIndex(i).ToString();
-
+		
 		UMenuButtonUI* NewButton = CreateWidget<UMenuButtonUI>(GetWorld(), MenuButtonClass);
 		if (NewButton)
 		{
-			NewButton->Init(NameString, this);
+			NewButton->Init(MenuValue, this);
 
 			int32 Row = ValidIndex / NumCols;
 			int32 Col = ValidIndex % NumCols;
@@ -50,12 +48,13 @@ void UCounterUI::NativeConstruct()
 	}
 }
 
-void UCounterUI::AddMenuToList(const FString& MenuName)
+void UCounterUI::AddMenuToList(const EBurgerMenu MenuName)
 {
 	UTextBlock* NewText = NewObject<UTextBlock>(this, UTextBlock::StaticClass());
 	if (NewText)
 	{
-		NewText->SetText(FText::FromString(MenuName));
+		OrderList.Add(MenuName);
+		NewText->SetText(StaticEnum<EBurgerMenu>()->GetDisplayNameTextByValue(static_cast<int64>(MenuName)));
 		SelectedListBox->AddChildToVerticalBox(NewText);
 	}
 }
@@ -63,11 +62,12 @@ void UCounterUI::AddMenuToList(const FString& MenuName)
 void UCounterUI::OrderMenu()
 {
 	PRINTLOG(TEXT("ORDER"));
-
+	OnClickOrderDelegate.Broadcast(OrderList);
 	DeleteList();
 }
 
 void UCounterUI::DeleteList()
 {
+	OrderList.Empty();
 	SelectedListBox->ClearChildren();
 }

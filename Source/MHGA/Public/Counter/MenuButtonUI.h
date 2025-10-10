@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "BurgerData.h"
 #include "MenuButtonUI.generated.h"
 
 class UCounterUI;
@@ -22,7 +23,7 @@ private:
 	UPROPERTY()
 	UCounterUI* CounterUI;
 	UPROPERTY()
-	FString MenuName;
+	EBurgerMenu MenuName;
 	
 protected:
 	UPROPERTY(meta=(BindWidget))
@@ -36,5 +37,5 @@ protected:
 	void OnClickedMenu();
 	
 public:
-	void Init(const FString& InName, UCounterUI* InOwner);
+	void Init(const EBurgerMenu InName, UCounterUI* InOwner);
 };
