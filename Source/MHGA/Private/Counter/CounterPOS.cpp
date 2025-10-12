@@ -31,22 +31,9 @@ void ACounterPOS::BeginPlay()
 	Super::BeginPlay();
 
 	CounterUI = Cast<UCounterUI>(WidgetComponent->GetWidget());
-	CounterUI->OnClickOrderDelegate.AddDynamic(this, &ACounterPOS::Order);
 }
 
 void ACounterPOS::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
-
-void ACounterPOS::Order(TArray<EBurgerMenu> Menus)
-{
-	OrderList.FindOrAdd(OrderNum) = {Menus};
-	PRINTLOG(TEXT("%d, %d"), OrderNum, OrderList[OrderNum].Menus.Num());
-
-	//TODO : 화면에 띄운다거나 AI가 주문을 마친 후 로직 추가
-
-	OrderNum++;
-	
-}
-
