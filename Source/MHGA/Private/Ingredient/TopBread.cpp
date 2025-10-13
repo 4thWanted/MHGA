@@ -1,0 +1,21 @@
+
+#include "Ingredient/TopBread.h"
+
+
+// Sets default values
+ATopBread::ATopBread()
+{
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+void ATopBread::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
+void ATopBread::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+

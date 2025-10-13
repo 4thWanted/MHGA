@@ -13,15 +13,18 @@ class MHGA_API AWrappingPaper : public AActor
 /* Method */
 public:
 	AWrappingPaper();
-	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
+	void AddIngredient(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
+	UFUNCTION()
+	void MinusIngredient(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 private:
-	EBurgerMenu CheckIngredients();
-
 	// 배열을 맵으로 변환
 	TMap<EIngredient, int32> MakeMapFromArray(const TArray<FIngredientStack>& InArray);
 
@@ -44,7 +47,7 @@ private:
 	UPROPERTY()
 	class UBoxComponent* Collision;
 
-	UPROPERTY()
+	UPROPERTY()	// 충돌한 재료 저장
 	TArray<FIngredientStack> OnAreaIngredients;
 	
 };
