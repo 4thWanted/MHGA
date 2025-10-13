@@ -42,11 +42,9 @@ protected:
 	UInputAction* IA_Pick;
 	UPROPERTY(EditAnywhere, Category ="Input")
 	UInputAction* IA_Use;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
-	USkeletalMeshComponent* FirstPersonMesh;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
-	UCameraComponent* FirstPersonCameraComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Components")
+	UCameraComponent* FPSCamComponent;
 
 	//comps
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
@@ -65,8 +63,8 @@ protected:
 
 
 public:
-	USkeletalMeshComponent* GetFirstPersonMesh() const { return FirstPersonMesh; }
-	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+	USkeletalMeshComponent* GetFirstPersonMesh() const { return GetMesh(); }
+	UCameraComponent* GetFirstPersonCameraComponent() const { return FPSCamComponent; }
 
 };
 
