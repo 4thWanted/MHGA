@@ -17,8 +17,6 @@ ACustomerAI::ACustomerAI()
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	// 이 캐릭터를 기본으로 조종할 AI 컨트롤러 지정
-	AIControllerClass = ACustomerAI::StaticClass();
 }
 
 // Called when the game starts or when spawned

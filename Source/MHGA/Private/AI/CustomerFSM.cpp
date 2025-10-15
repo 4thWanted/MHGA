@@ -48,14 +48,13 @@ void UCustomerFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 		}
 	}
 
-	// if (CurrentState == EAIState::GoingToLine)
-	// {
-	// 	MoveToTarget(OrderTarget);
-	// 	if (FVector::Dist(me->GetActorLocation() , OrderTarget->GetActorLocation()) <= 0)
-	// 	{
-	// 		SetState(EAIState::Ordering);
-	// 	}
-	// }
+	if (CurrentState == EAIState::GoingToLine)
+	{
+		if (FVector::Dist(me->GetActorLocation() , OrderTarget->GetActorLocation()) <= 0)
+		{
+			SetState(EAIState::Ordering);
+		}
+	}
 
 	if (CurrentState == EAIState::GoingToPickup)
 	{
