@@ -7,6 +7,8 @@
 #include "Logging/LogMacros.h"
 #include "MHGACharacter.generated.h"
 
+class UWidgetInteractionComponent;
+class UInteractComponent;
 class UInputComponent;
 class USkeletalMeshComponent;
 class UCameraComponent;
@@ -22,16 +24,16 @@ UCLASS()
 class AMHGACharacter : public ACharacter
 {
 	GENERATED_BODY()
+
+public:
+	AMHGACharacter();
 	
 protected:
+	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
-	USkeletalMeshComponent* FirstPersonMesh;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* FirstPersonCameraComponent;
-
+	//inputs
 	UPROPERTY(EditAnywhere, Category ="Input")
 	UInputAction* IA_Move;
 	UPROPERTY(EditAnywhere, Category ="Input")
@@ -40,24 +42,29 @@ protected:
 	UInputAction* IA_Pick;
 	UPROPERTY(EditAnywhere, Category ="Input")
 	UInputAction* IA_Use;
-	
-public:
-	AMHGACharacter();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Components")
+	UCameraComponent* FPSCamComponent;
+
+	//comps
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UInteractComponent* InteractComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UWidgetInteractionComponent* WidgetInteraction; //3d widget interact
+
+
 
 protected:
 	void MoveInput(const FInputActionValue& Value);
 	void LookInput(const FInputActionValue& Value);
 	void PickInput(const FInputActionValue& Value);
 	void UseInput(const FInputActionValue& Value);
+	void UseInputRelease(const FInputActionValue& Value);
 
-	UFUNCTION(BlueprintCallable, Category="Input")
-	virtual void DoMove(float Right, float Forward);
-	UFUNCTION(BlueprintCallable, Category="Input")
-	virtual void DoAim(float Yaw, float Pitch);
 
 public:
-	USkeletalMeshComponent* GetFirstPersonMesh() const { return FirstPersonMesh; }
-	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+	USkeletalMeshComponent* GetFirstPersonMesh() const { return GetMesh(); }
+	UCameraComponent* GetFirstPersonCameraComponent() const { return FPSCamComponent; }
 
 };
 
