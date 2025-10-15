@@ -8,7 +8,7 @@
 
 class UInputMappingContext;
 
-UCLASS()
+UCLASS(abstract)
 class MHGA_API AMHGAPlayerController : public APlayerController
 {
 	GENERATED_BODY()
