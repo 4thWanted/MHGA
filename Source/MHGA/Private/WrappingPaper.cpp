@@ -285,12 +285,18 @@ void AWrappingPaper::CompleteWrapping()
 void AWrappingPaper::DestroyIngredients()
 {
 	// TODO: OverlappingActors에 저장된 액터 포인터를 순회하며 Destroy를 호출한다.
-	for (TWeakObjectPtr<AActor> ptr : OverlappingActors)
-	{
-		ptr->Destroy();
-	}
+	TArray<TWeakObjectPtr<AActor>> ActorsToDestroy = OverlappingActors;
 	// TODO: OnAreaIngredients와 OverlappingActors를 비워 다음 사용에 대비한다.
 	OverlappingActors.Empty();
+	OnAreaIngredients.Empty();
+
+	for (const TWeakObjectPtr<AActor>& Ptr : ActorsToDestroy)
+	{
+		if (AActor* Actor = Ptr.Get())
+		{
+			Actor->Destroy();
+		}
+	}
 	// TODO: WrappingPaper 자신도 Destroy하여 포장 과정을 마무리한다.
 	Destroy();
 }

@@ -65,6 +65,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Debug)
 	bool bShowLog = true;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AHamburger> BurgerClass;
 
 protected:
 
@@ -76,7 +78,5 @@ private:
 	UPROPERTY()	// 완료 시 제거할 액터 추적
 	TArray<TWeakObjectPtr<AActor>> OverlappingActors;
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class AHamburger> BurgerClass;
 	
 };

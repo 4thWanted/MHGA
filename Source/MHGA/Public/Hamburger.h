@@ -1,11 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GrabableProps.h"
 #include "GameFramework/Actor.h"
 #include "Hamburger.generated.h"
 
 UCLASS()
-class MHGA_API AHamburger : public AActor
+class MHGA_API AHamburger : public AActor, public IGrabableProps
 {
 	GENERATED_BODY()
 
@@ -14,6 +15,10 @@ public:
 	AHamburger();
 
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void OnGrabbed() override;
+	virtual void OnPut() override;
+	virtual void OnUse() override;
 
 	void SetName(FString Name);
 	
@@ -28,11 +33,10 @@ private:
 /* Field */
 public:
 	UPROPERTY(VisibleAnywhere)
-	class UBoxComponent* Collision;
-
-	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* Mesh;
 
+	UPROPERTY(EditAnywhere)
+	bool bShowLog = true;
 private:
 	FString BurgerName;
 	

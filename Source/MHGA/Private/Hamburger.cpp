@@ -8,11 +8,10 @@ AHamburger::AHamburger()
 
 	BurgerName.Empty();
 
-	Collision = CreateDefaultSubobject<UBoxComponent>(FName("Collision"));
-	SetRootComponent(Collision);
-	
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	Mesh->SetupAttachment(RootComponent);
+	SetRootComponent(Mesh);
+	Mesh->SetSimulatePhysics(true);
+	Mesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 	
 }
 
@@ -26,7 +25,23 @@ void AHamburger::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	PrintLog();
+	if (bShowLog)
+		PrintLog();
+}
+
+void AHamburger::OnGrabbed()
+{
+	return;
+}
+
+void AHamburger::OnPut()
+{
+	return;
+}
+
+void AHamburger::OnUse()
+{
+	return;
 }
 
 void AHamburger::PrintLog()
