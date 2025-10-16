@@ -46,8 +46,8 @@ protected:
 	void OnUpdateCanvas(UCanvas* Canvas, int32 Width, int32 Height);
 
 public:
-	UFUNCTION(BlueprintCallable)
-	void Init(int32 InOrderNum, const TArray<FString>& InMenus);
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_Init(int32 InOrderNum, const TArray<FString>& InMenus);
 
 	virtual void OnGrabbed() override {}
 	virtual void OnPut() override {}

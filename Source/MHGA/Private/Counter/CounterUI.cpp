@@ -122,6 +122,8 @@ void UCounterUI::OnClickMenuBtnRPC()
 
 void UCounterUI::OrderMenuBtnRPC()
 {
+	FString isSercer =  PosActor->HasAuthority() ? TEXT("서버") : TEXT("Client");
+	PRINTLOG(TEXT("%s"), *isSercer);
 	if (OrderList.Num() < 1) return;
 	
 	PosActor->OrderMap.FindOrAdd(PosActor->OrderNum) = {OrderList};
@@ -138,18 +140,22 @@ void UCounterUI::OrderMenuBtnRPC()
 
 		CustomerGrid->AddChildToUniformGrid(NewCustomerBtn, Row, Col);
 	}
-	
-	//영수증 출력
-	AReceiptActor* NewReceipt = GetWorld()->SpawnActor<AReceiptActor>(AReceiptActor::StaticClass());
-	if (NewReceipt)
+
+	if (PosActor->HasAuthority())
 	{
-		TArray<FString> MenuStrings;
-		for (EBurgerMenu Menu : OrderList)
+		//영수증 출력
+		AReceiptActor* NewReceipt = GetWorld()->SpawnActor<AReceiptActor>(AReceiptActor::StaticClass());
+		if (NewReceipt)
 		{
-			FString MenuName = MenuEnumPtr->GetDisplayNameTextByValue(static_cast<int64>(Menu)).ToString();
-			MenuStrings.Add(MenuName);
+			TArray<FString> MenuStrings;
+			for (EBurgerMenu Menu : OrderList)
+			{
+				FString MenuName = MenuEnumPtr->GetDisplayNameTextByValue(static_cast<int64>(Menu)).ToString();
+				MenuStrings.Add(MenuName);
+			}
+			NewReceipt->MulticastRPC_Init(PosActor->OrderNum, MenuStrings);
 		}
-		NewReceipt->Init(PosActor->OrderNum, MenuStrings);
+		
 	}
 	
 	//TODO : AI가 주문을 마친 후 로직 추가
