@@ -14,7 +14,9 @@ ACustomerAI::ACustomerAI()
 	PrimaryActorTick.bCanEverTick = true;
 
 	fsm = CreateDefaultSubobject<UCustomerFSM>(TEXT("FSM"));
-	
+
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
 }
 
 // Called when the game starts or when spawned

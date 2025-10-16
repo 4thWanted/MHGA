@@ -40,7 +40,7 @@ struct FIngredientStack
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    EIngredient  IngredientId;
+    EIngredient  IngredientId = EIngredient::None;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     int32 Quantity = 0;
