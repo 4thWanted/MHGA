@@ -54,4 +54,7 @@ public:
 	void ServerRPC_InteractProps();
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_UseProps();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_PutProps();
 };

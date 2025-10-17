@@ -23,9 +23,9 @@ void ASauceBottle::BeginPlay()
 	
 }
 
-void ASauceBottle::OnGrabbed()
+void ASauceBottle::OnGrabbed(AMHGACharacter* Player)
 {
-	Super::OnGrabbed();
+	Super::OnGrabbed(Player);
 
 	bGrabbed = true;
 }

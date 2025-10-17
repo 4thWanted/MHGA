@@ -6,6 +6,7 @@
 #include "UObject/Interface.h"
 #include "GrabableProps.generated.h"
 
+class AMHGACharacter;
 // This class does not need to be modified.
 UINTERFACE()
 class UGrabableProps : public UInterface
@@ -19,7 +20,7 @@ class MHGA_API IGrabableProps
 
 public:
 	UFUNCTION(Category="GrabComp")
-	virtual void OnGrabbed() = 0;
+	virtual void OnGrabbed(AMHGACharacter* Player) = 0;
 	UFUNCTION(Category="GrabComp")
 	virtual void OnPut() = 0;
 	UFUNCTION(Category="GrabComp")

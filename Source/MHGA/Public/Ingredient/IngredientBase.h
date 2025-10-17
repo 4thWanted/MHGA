@@ -8,6 +8,7 @@
 #include "GameFramework/Actor.h"
 #include "IngredientBase.generated.h"
 
+class AMHGACharacter;
 enum class EIngredient : uint8;
 
 UCLASS()
@@ -19,7 +20,7 @@ class MHGA_API AIngredientBase : public AActor, public IGrabableProps
 public:
 	AIngredientBase();
 
-	virtual void OnGrabbed() override;
+	virtual void OnGrabbed(AMHGACharacter* Player) override;
 	virtual void OnPut() override;
 	virtual void OnUse() override;
 	EIngredient GetIngType() { return IngType; }
@@ -27,7 +28,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	
 
 private:
 
@@ -42,7 +42,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Ingredients")
 	EIngredient IngType = EIngredient::None;
 
-private:
-
+	UPROPERTY(EditAnywhere, Category = "Ingredients")
+	AMHGACharacter* GrabCharacter;
 	
 };
