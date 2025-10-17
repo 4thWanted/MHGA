@@ -7,6 +7,8 @@
 #include "Components/ActorComponent.h"
 #include "CustomerFSM.generated.h"
 
+class ATargetPoint;
+
 UENUM(BlueprintType)
 enum class EAIState : uint8
 {
@@ -78,7 +80,7 @@ public:
 	UFUNCTION()
 	void FindTarget();
 	UPROPERTY(EditAnywhere, Category="AI Navigation")
-	TArray<AActor*> targetPoints;
+	TArray<ATargetPoint*> targetPoints;
 	
 	UFUNCTION()
 	void EnterStore();
@@ -117,6 +119,6 @@ public:
 	void ReceiveFood(const FString& receivedFood);
 	
 	UFUNCTION()
-	void MoveToTarget(const AActor* target);
+	void MoveToTarget(const ATargetPoint* target);
 		
 };

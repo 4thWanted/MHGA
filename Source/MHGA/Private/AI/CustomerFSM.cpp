@@ -9,6 +9,7 @@
 #include "NavigationSystem.h"
 #include "AI/CustomerAI.h"
 #include "Blueprint/UserWidget.h"
+#include "Engine/TargetPoint.h"
 #include "Kismet/GameplayStatics.h"
 #include "Navigation/PathFollowingComponent.h"
 
@@ -36,6 +37,20 @@ void UCustomerFSM::BeginPlay()
 	EnterStore();
 }
 
+void UCustomerFSM::FindTarget()
+{
+	TArray<AActor*> allTarget;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), allTarget);
+	for (auto target: allTarget)
+	{
+		// 이름이 target 녀석을 배열에 추가
+		if (target->GetName().Contains(TEXT("Target")))
+		{
+			targetPoints.Add(target);
+		}
+	}
+	OrderTarget = targetPoints[0];
+}
 
 // Called every frame
 void UCustomerFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -150,22 +165,6 @@ void UCustomerFSM::SetState(EAIState NewState)
 		break;
 	}
 }
-
-void UCustomerFSM::FindTarget()
-{
-	TArray<AActor*> allActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), allActors);
-	for (auto target: allActors)
-	{
-		// 이름이 spawnpoint 녀석을 배열에 추가
-		if (target->GetName().Contains(TEXT("Target")))
-		{
-			targetPoints.Add(target);
-		}
-	}
-	OrderTarget = targetPoints[0];
-}
-
 
 void UCustomerFSM::OnOrderCompleted()
 {
