@@ -63,6 +63,7 @@ protected:
 public:
 	USkeletalMeshComponent* GetFirstPersonMesh() const { return GetMesh(); }
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FPSCamComponent; }
+	UInteractComponent* GetInteractComponent() const {return InteractComponent;}
 
 };
 

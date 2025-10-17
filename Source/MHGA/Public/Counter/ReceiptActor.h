@@ -49,7 +49,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_Init(int32 InOrderNum, const TArray<FString>& InMenus);
 
-	virtual void OnGrabbed() override {}
+	virtual void OnGrabbed(AMHGACharacter* Player) override {}
 	virtual void OnPut() override {}
 	virtual void OnUse() override{}
 };

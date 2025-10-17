@@ -29,7 +29,7 @@ void AHamburger::Tick(float DeltaTime)
 		PrintLog();
 }
 
-void AHamburger::OnGrabbed()
+void AHamburger::OnGrabbed(AMHGACharacter* Player)
 {
 	return;
 }

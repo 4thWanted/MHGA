@@ -25,6 +25,8 @@ void UInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	//if (Owner->HasAuthority() == false) return;
+
 	if (PhysicsHandle->GrabbedComponent && bIsGrabbed)
 	{
 		FVector HoldLocation = Owner->GetFirstPersonCameraComponent()->GetComponentLocation() +
@@ -61,6 +63,8 @@ void UInteractComponent::GrabProps()
 			IGrabableProps* GrabInterface = Cast<IGrabableProps>(Hit.GetActor());
 			if (GrabInterface == nullptr)
 				return;
+
+			GrabInterface->OnGrabbed(Owner);
 			
 			UPrimitiveComponent* HitComp = Hit.GetComponent();
 			HitComp->WakeAllRigidBodies();
@@ -73,7 +77,6 @@ void UInteractComponent::GrabProps()
 
 			bIsGrabbed = true;
 			GrabbedProp = GrabInterface;
-			GrabInterface->OnGrabbed();
 		}
 	}
 	
@@ -91,7 +94,12 @@ void UInteractComponent::PutProps()
 	}
 }
 
-void UInteractComponent::InteractProps()
+void UInteractComponent::ServerRPC_PutProps_Implementation()
+{
+	PutProps();
+}
+
+void UInteractComponent::ServerRPC_InteractProps_Implementation()
 {
 	if (!bIsGrabbed)
 		GrabProps();
@@ -99,7 +107,7 @@ void UInteractComponent::InteractProps()
 		PutProps();
 }
 
-void UInteractComponent::UseProps()
+void UInteractComponent::ServerRPC_UseProps_Implementation()
 {
 	if (bIsGrabbed && GrabbedProp)
 	{

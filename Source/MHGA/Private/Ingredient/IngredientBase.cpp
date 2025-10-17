@@ -4,6 +4,8 @@
 #include "Ingredient/IngredientBase.h"
 
 #include "MHGA.h"
+#include "Player/InteractComponent.h"
+#include "Player/MHGACharacter.h"
 
 
 AIngredientBase::AIngredientBase()
@@ -14,12 +16,23 @@ AIngredientBase::AIngredientBase()
 	SetRootComponent(Mesh);
 	Mesh->SetSimulatePhysics(true);
 	Mesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+
+	Mesh->SetSimulatePhysics(true);
+	Mesh->SetEnableGravity(true);
+
+	bReplicates = true;
+	AActor::SetReplicateMovement(true);
 }
 
 void AIngredientBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	if (HasAuthority() == false)
+	{
+		Mesh->SetSimulatePhysics(false);
+		Mesh->SetEnableGravity(false);
+	}
 }
 
 void AIngredientBase::Tick(float DeltaTime)
@@ -27,13 +40,23 @@ void AIngredientBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AIngredientBase::OnGrabbed()
+
+void AIngredientBase::OnGrabbed(AMHGACharacter* Player)
 {
+	if (GrabCharacter != Player && GrabCharacter != nullptr)
+	{
+		PRINTINFO();
+		GrabCharacter->GetInteractComponent()->ServerRPC_PutProps();
+	}
+
+	GrabCharacter = Player;
 	PRINTLOG(TEXT("GRAB!"));
 }
 
+
 void AIngredientBase::OnPut()
 {
+	GrabCharacter = nullptr;
 	PRINTLOG(TEXT("PUT!"));
 }
 
