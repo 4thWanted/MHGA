@@ -72,7 +72,8 @@ void ASauceBottle::ShootSauce()
 			FString name = FString::Printf(TEXT("Hit Actor : %s"), *HitResult.GetActor()->GetActorNameOrLabel());
 			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, name, true);
 		}
-		FVector SpawnLoc = HitResult.ImpactPoint + FVector(0, 0, 5);
-		GetWorld()->SpawnActor<AIngredientBase>(SpawnLoc, FRotator::ZeroRotator);
+		FVector SpawnLoc = HitResult.ImpactPoint + FVector(0, 0, 20);
+		UE_LOG(LogTemp, Warning, TEXT("%f, %f, %f"), SpawnLoc.X, SpawnLoc.Y, SpawnLoc.Z);
+		auto Sauce = GetWorld()->SpawnActor(SauceClass, &SpawnLoc, &FRotator::ZeroRotator);
 	}
 }
