@@ -7,9 +7,11 @@
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
 #include "Components/VerticalBox.h"
+#include "Counter/CounterPOS.h"
 #include "Counter/MenuButtonUI.h"
 #include "Counter/CustomerButtonUI.h"
 #include "Counter/ReceiptActor.h"
+#include "Player/MHGAPlayerController.h"
 
 
 UCounterUI::UCounterUI(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
@@ -61,96 +63,119 @@ void UCounterUI::NativeConstruct()
 	CustomerCanvas->SetVisibility(ESlateVisibility::Hidden);
 }
 
+void UCounterUI::SetPosActor(ACounterPOS* Pos)
+{
+	PosActor = Pos;
+}
+
 void UCounterUI::OnClickCustomerBtn()
 {
-	CustomerCanvas->SetVisibility(ESlateVisibility::Visible);
-	OrderCanvas->SetVisibility(ESlateVisibility::Hidden);
+	AMHGAPlayerController* pc = Cast<AMHGAPlayerController>(GetWorld()->GetFirstPlayerController());
+	pc->ServerRPC_OnClickCustomerBtn();
+	//PosActor->ServerRPC_OnClickCustomerBtn();
 }
 
 void UCounterUI::OnClickMenuBtn()
 {
-	CustomerCanvas->SetVisibility(ESlateVisibility::Hidden);
-	OrderCanvas->SetVisibility(ESlateVisibility::Visible);
-}
-
-void UCounterUI::AddMenuToList(const EBurgerMenu MenuName)
-{
-	UTextBlock* NewText = NewObject<UTextBlock>(this, UTextBlock::StaticClass());
-	if (NewText)
-	{
-		OrderList.Add(MenuName);
-		NewText->SetText(MenuEnumPtr->GetDisplayNameTextByValue(static_cast<int64>(MenuName)));
-		SelectedListBox->AddChildToVerticalBox(NewText);
-	}
-}
-
-void UCounterUI::OrderedMenu(UCustomerButtonUI* Btn)
-{
-	MenuListBox->ClearChildren();
-	
-	CustomerBtn = Btn;
-	TArray<EBurgerMenu> Menu = CustomerBtn->GetMenuInfo();
-	for (EBurgerMenu M : Menu)
-	{
-		UTextBlock* NewText = NewObject<UTextBlock>(this, UTextBlock::StaticClass());
-		if (NewText)
-		{
-			NewText->SetText(MenuEnumPtr->GetDisplayNameTextByValue(static_cast<int64>(M)));
-			MenuListBox->AddChildToVerticalBox(NewText);
-		}
-	}
+	AMHGAPlayerController* pc = Cast<AMHGAPlayerController>(GetWorld()->GetFirstPlayerController());
+	pc->ServerRPC_OnClickMenuBtn();
+	//PosActor->ServerRPC_OnClickMenuBtn();
 }
 
 void UCounterUI::OrderMenuBtn()
 {
+	AMHGAPlayerController* pc = Cast<AMHGAPlayerController>(GetWorld()->GetFirstPlayerController());
+	pc->ServerRPC_OrderMenuBtn();
+	//PosActor->ServerRPC_OrderMenuBtn();
+}
+
+void UCounterUI::DeleteListBtn()
+{
+	AMHGAPlayerController* pc = Cast<AMHGAPlayerController>(GetWorld()->GetFirstPlayerController());
+	pc->ServerRPC_DeleteListBtn();
+	//PosActor->ServerRPC_DeleteListBtn();
+}
+
+void UCounterUI::OnMenuReadyBtn()
+{
+	AMHGAPlayerController* pc = Cast<AMHGAPlayerController>(GetWorld()->GetFirstPlayerController());
+	pc->ServerRPC_OnMenuReadyBtn();
+	//PosActor->ServerRPC_OnMenuReadyBtn();
+}
+
+
+void UCounterUI::OnClickCustomerBtnRPC()
+{
+	PRINTINFO();
+	
+	CustomerCanvas->SetVisibility(ESlateVisibility::Visible);
+	OrderCanvas->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UCounterUI::OnClickMenuBtnRPC()
+{
+	PRINTINFO();
+	
+	CustomerCanvas->SetVisibility(ESlateVisibility::Hidden);
+	OrderCanvas->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UCounterUI::OrderMenuBtnRPC()
+{
+	FString isSercer =  PosActor->HasAuthority() ? TEXT("서버") : TEXT("Client");
+	PRINTLOG(TEXT("%s"), *isSercer);
 	if (OrderList.Num() < 1) return;
 	
-	OrderMap.FindOrAdd(OrderNum) = {OrderList};
+	PosActor->OrderMap.FindOrAdd(PosActor->OrderNum) = {OrderList};
 	//PRINTLOG(TEXT("%d, %d"), OrderNum, OrderMap[OrderNum].Menus.Num());
 
 	//주문완료 시 해당 주문 번호 버튼 생성
 	UCustomerButtonUI* NewCustomerBtn = CreateWidget<UCustomerButtonUI>(GetWorld(), CustomerButtonClass);
 	if (NewCustomerBtn)
 	{
-		NewCustomerBtn->Init(OrderList, OrderNum, this);
+		NewCustomerBtn->Init(OrderList, PosActor->OrderNum, this);
 		int32 NumChildren = CustomerGrid->GetChildrenCount();
 		int32 Row = NumChildren / GridCol;
 		int32 Col = NumChildren % GridCol;
 
 		CustomerGrid->AddChildToUniformGrid(NewCustomerBtn, Row, Col);
 	}
-	
-	//영수증 출력
-	AReceiptActor* NewReceipt = GetWorld()->SpawnActor<AReceiptActor>(AReceiptActor::StaticClass());
-	if (NewReceipt)
+
+	if (PosActor->HasAuthority())
 	{
-		TArray<FString> MenuStrings;
-		for (EBurgerMenu Menu : OrderList)
+		//영수증 출력
+		AReceiptActor* NewReceipt = GetWorld()->SpawnActor<AReceiptActor>(AReceiptActor::StaticClass());
+		if (NewReceipt)
 		{
-			FString MenuName = MenuEnumPtr->GetDisplayNameTextByValue(static_cast<int64>(Menu)).ToString();
-			MenuStrings.Add(MenuName);
+			TArray<FString> MenuStrings;
+			for (EBurgerMenu Menu : OrderList)
+			{
+				FString MenuName = MenuEnumPtr->GetDisplayNameTextByValue(static_cast<int64>(Menu)).ToString();
+				MenuStrings.Add(MenuName);
+			}
+			NewReceipt->MulticastRPC_Init(PosActor->OrderNum, MenuStrings);
 		}
-		NewReceipt->Init(OrderNum, MenuStrings);
+		
 	}
 	
 	//TODO : AI가 주문을 마친 후 로직 추가
 
-	OrderNum++;
+	PosActor->OrderNum++;
 	DeleteListBtn();
 }
 
-void UCounterUI::DeleteListBtn()
+void UCounterUI::DeleteListBtnRPC()
 {
 	OrderList.Empty();
 	SelectedListBox->ClearChildren();
 }
 
-void UCounterUI::OnMenuReadyBtn()
+void UCounterUI::OnMenuReadyBtnRPC()
 {
 	if (CustomerBtn == nullptr)
 		return;
 	
-	OrderMap.Remove(CustomerBtn->GetNum());
+	PosActor->OrderMap.Remove(CustomerBtn->GetNum());
 	MenuListBox->ClearChildren();
 	CustomerGrid->RemoveChild(CustomerBtn);
 
@@ -169,4 +194,32 @@ void UCounterUI::OnMenuReadyBtn()
 	//TODO : 손님 호출
 	
 	CustomerBtn = nullptr;
+}
+
+void UCounterUI::AddMenuToListRPC(const EBurgerMenu MenuName)
+{
+	UTextBlock* NewText = NewObject<UTextBlock>(this, UTextBlock::StaticClass());
+	if (NewText)
+	{
+		OrderList.Add(MenuName);
+		NewText->SetText(MenuEnumPtr->GetDisplayNameTextByValue(static_cast<int64>(MenuName)));
+		SelectedListBox->AddChildToVerticalBox(NewText);
+	}
+}
+
+void UCounterUI::CustomerOrderedMenuRPC(UCustomerButtonUI* Btn)
+{
+	MenuListBox->ClearChildren();
+	
+	CustomerBtn = Btn;
+	TArray<EBurgerMenu> Menu = Btn->GetMenuInfo();
+	for (EBurgerMenu M : Menu)
+	{
+		UTextBlock* NewText = NewObject<UTextBlock>(this, UTextBlock::StaticClass());
+		if (NewText)
+		{
+			NewText->SetText(MenuEnumPtr->GetDisplayNameTextByValue(static_cast<int64>(M)));
+			MenuListBox->AddChildToVerticalBox(NewText);
+		}
+	}
 }

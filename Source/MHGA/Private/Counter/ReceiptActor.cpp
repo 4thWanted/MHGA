@@ -26,18 +26,14 @@ AReceiptActor::AReceiptActor()
 		PaperMesh->SetMaterial(0, mat.Object);
 	PaperMesh->SetupAttachment(RootComponent);
 	PaperMesh->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+
+	bReplicates = true;
+	SetReplicateMovement(true);
 }
 
 void AReceiptActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	RenderTarget = UCanvasRenderTarget2D::CreateCanvasRenderTarget2D(GetWorld(), UCanvasRenderTarget2D::StaticClass(), 512, 512);
-
-	// 머티리얼 인스턴스 생성
-	DynamicMat = PaperMesh->CreateDynamicMaterialInstance(0);
-	DynamicMat->SetTextureParameterValue(TEXT("ReceiptTexture"), RenderTarget);
-	RenderTarget->OnCanvasRenderTargetUpdate.AddDynamic(this, &AReceiptActor::OnUpdateCanvas);
 }
 
 void AReceiptActor::OnUpdateCanvas(UCanvas* Canvas, int32 Width, int32 Height)
@@ -82,11 +78,18 @@ void AReceiptActor::OnUpdateCanvas(UCanvas* Canvas, int32 Width, int32 Height)
 	}
 }
 
-void AReceiptActor::Init(int32 InOrderNum, const TArray<FString>& InMenus)
+void AReceiptActor::MulticastRPC_Init_Implementation(int32 InOrderNum, const TArray<FString>& InMenus)
 {
 	OrderNum = InOrderNum;
 	MenuList = InMenus;
+	
+	RenderTarget = UCanvasRenderTarget2D::CreateCanvasRenderTarget2D(GetWorld(), UCanvasRenderTarget2D::StaticClass(), 512, 512);
 
+	// 머티리얼 인스턴스 생성
+	DynamicMat = PaperMesh->CreateDynamicMaterialInstance(0);
+	DynamicMat->SetTextureParameterValue(TEXT("ReceiptTexture"), RenderTarget);
+	RenderTarget->OnCanvasRenderTargetUpdate.AddDynamic(this, &AReceiptActor::OnUpdateCanvas);
+	
 	// 즉시 업데이트
 	RenderTarget->UpdateResource();
 	PRINTINFO();

@@ -15,22 +15,35 @@ class MHGA_API AIngredientBase : public AActor, public IGrabableProps
 {
 	GENERATED_BODY()
 
+/* Method */
 public:
 	AIngredientBase();
+
+	virtual void OnGrabbed() override;
+	virtual void OnPut() override;
+	virtual void OnUse() override;
+
+	EIngredient GetIngType() { return IngType; }
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+	
 
+private:
+
+	
+/* Field */
+public:
+		
 protected:
 	UPROPERTY(EditAnywhere, Category = "Ingredients")
 	UStaticMeshComponent* Mesh;
 
 	UPROPERTY(EditAnywhere, Category = "Ingredients")
 	EIngredient IngType = EIngredient::None;
+
+private:
+
 	
-public:
-	virtual void OnGrabbed() override;
-	virtual void OnPut() override;
-	virtual void OnUse() override;
 };
