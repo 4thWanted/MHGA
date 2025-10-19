@@ -24,7 +24,7 @@ void UInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                        FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+ 	
 	//if (Owner->HasAuthority() == false) return;
 
 	if (PhysicsHandle->GrabbedComponent && bIsGrabbed)
@@ -64,6 +64,7 @@ void UInteractComponent::GrabProps()
 			if (GrabInterface == nullptr)
 				return;
 
+			HoldDistance = FVector::Dist(Start, Hit.GetComponent()->GetComponentLocation());
 			GrabInterface->OnGrabbed(Owner);
 			
 			UPrimitiveComponent* HitComp = Hit.GetComponent();
