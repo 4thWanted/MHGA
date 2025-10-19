@@ -91,6 +91,8 @@ public:
 	
 	UFUNCTION()
 	void StartWandering();
+	UFUNCTION()
+	void StopWandering();
 	FVector randomPos;
 	bool GetRandomPositionInNavMesh(const FVector& centerPos, const float radius, FVector& dest);
 	// 배회 행동을 주기적으로 실행할 타이머 핸들

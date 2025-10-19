@@ -30,20 +30,37 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
-	// 손님 스폰 시간
+	// 손님 스폰 관리
+	// 손님 스폰 타이머 핸들
 	FTimerHandle spawnTimer;
+	// 손님 스폰 최소 시간
 	UPROPERTY(EditAnywhere, Category = "Spawn")
 	float minTime = 1;
+	// 손님 스폰 최대 시간
 	UPROPERTY(EditAnywhere, Category = "Spawn")
 	float maxTime = 5;
 	
+	// 스폰할 수 있는 손님의 최대 인원수
+	UPROPERTY(EditAnywhere, Category = "Spawn")
+	int32 MaxSpawnedCustomers = 10;
+
+	// 현재 스폰되어 있는 손님의 수
+	UPROPERTY(VisibleAnywhere, Category = "Spawn")
+	int32 CurrentSpawnedCustomers = 0;
+
+	// 손님이 가게를 나갈 때 호출되는 함수
+	void OnCustomerExited();
+	
+	// 손님 스폰 포인트
 	UPROPERTY(EditAnywhere, Category = "Spawn")
 	ATargetPoint* spawnPoint;
 	
 	UPROPERTY(EditAnywhere, Category = "Spawn")
 	TSubclassOf<class ACustomerAI> spawnFactory;
 
+	// 손님을 스폰하는 함수
 	void SpawnCustomer();
+	
 
 	// -- 손님 줄세우기--
 	// 주문 대기열 위치

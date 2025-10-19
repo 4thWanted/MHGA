@@ -115,21 +115,7 @@ void UCustomerFSM::SetState(EAIState NewState)
 		return;
 	}
 
-	// 타이머 초기화
-	// ★★★★★★★ 핵심 수정 ★★★★★★★
-	// 이전 상태가 'Wandering' 또는 'WaitingForFood' 였다면 타이머를 정리합니다.
-	if (CurrentState == EAIState::Wandering || CurrentState == EAIState::WaitingForFood)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(wanderTimerHandle);
-	}
-	// if (CurrentState == EAIState::WaitingForFood)
-	// {
-	// 	StateTimer = 0;
-	// }
-	if (CurrentState == EAIState::Wandering && NewState != EAIState::Wandering)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(wanderTimerHandle);
-	}
+	StopWandering();
 
 	CurrentState = NewState;
 
@@ -186,9 +172,7 @@ void UCustomerFSM::SetState(EAIState NewState)
 		
 	case EAIState::Exit:
 		{
-			ExitTarget = manager->RequestExitPoint();
-			if (ExitTarget == nullptr) return;
-			MoveToTarget(ExitTarget);
+			ExitStore();
 			break;
 		}
 	case EAIState::None:
@@ -261,6 +245,11 @@ void UCustomerFSM::StartWandering()
 	// }
 }
 
+void UCustomerFSM::StopWandering()
+{
+	GetWorld()->GetTimerManager().ClearTimer(wanderTimerHandle);
+}
+
 bool UCustomerFSM::GetRandomPositionInNavMesh(const FVector& centerPos, const float radius, FVector& dest)
 {
 	// 네비게이션 시스템 가져오기
@@ -275,6 +264,8 @@ bool UCustomerFSM::GetRandomPositionInNavMesh(const FVector& centerPos, const fl
 
 void UCustomerFSM::MoveToRandomLocation()
 {
+	if (!IsValid(AIController) || !GetOwner()) return;
+	
 	if (GetOwner() && GetRandomPositionInNavMesh(GetOwner()->GetActorLocation(), 500, randomPos))
 	{
 		if (AIController)
@@ -426,6 +417,16 @@ void UCustomerFSM::CheckAndTakeFood()
 
 void UCustomerFSM::ExitStore()
 {
+	ExitTarget = manager->RequestExitPoint();
+	if (ExitTarget)
+	{
+		MoveToTarget(ExitTarget);
+		GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
+		if (manager)
+		{
+			manager->OnCustomerExited();
+		}
+	}
 }
 
 void UCustomerFSM::MoveToTarget(const ATargetPoint* target)

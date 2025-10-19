@@ -35,10 +35,23 @@ void ACustomerManager::Tick(float DeltaTime)
 
 void ACustomerManager::SpawnCustomer()
 {
+	// 현재 인원수가 최대 인원수보다 적은지 확인
+	if (CurrentSpawnedCustomers >= MaxSpawnedCustomers)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("최대 손님 인원수(%d명)에 도달하여 더 이상 스폰하지 않습니다."), MaxSpawnedCustomers);
+        
+		// 스폰 타이머를 다시 설정하여 주기적으로 재확인하도록 할 수 있습니다.
+		float spawnTime = FMath::RandRange(minTime, maxTime);
+		GetWorld()->GetTimerManager().SetTimer(spawnTimer, this, &ACustomerManager::SpawnCustomer, spawnTime);
+		return; // 함수를 여기서 종료하여 스폰을 막습니다.
+	}
+	
 	auto transform = spawnPoint->GetActorTransform();
 	// 손님 스폰
 	GetWorld()->SpawnActor<ACustomerAI>(spawnFactory, transform.GetLocation(), transform.Rotator());
 
+	CurrentSpawnedCustomers++;
+	
 	// 스폰 시간 랜덤으로 다시 지정
 	float spawnTime = FMath::RandRange(minTime, maxTime);
 	// 스폰 타이머 재설정
@@ -162,6 +175,7 @@ void ACustomerManager::CallNextCustomerFromWandering()
 			if (nextCustomer)
 			{
 				nextCustomer->fsm->MoveToTarget(waitingPoints[emptySpotIdx]);
+				nextCustomer->fsm->SetState(EAIState::GoingToLine);
 			}
 		}
 	}
@@ -195,4 +209,16 @@ void ACustomerManager::OnFoodPlacedInZone(APickupZone* Zone)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("음식은 준비되었지만, 호출할 대기 손님이 없습니다."));
 	}
+}
+
+void ACustomerManager::OnCustomerExited()
+{
+	CurrentSpawnedCustomers--;
+
+	// 혹시 모를 오류를 방지하기 위해 음수가 되지 않도록 합니다.
+	if (CurrentSpawnedCustomers < 0)
+	{
+		CurrentSpawnedCustomers = 0;
+	}
+	UE_LOG(LogTemp, Log, TEXT("손님이 퇴장했습니다. (현재: %d/%d명)"), CurrentSpawnedCustomers, MaxSpawnedCustomers);
 }
