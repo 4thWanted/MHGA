@@ -126,7 +126,7 @@ void UCounterUI::OrderMenuBtnRPC()
 {
 	//FString isSercer =  PosActor->HasAuthority() ? TEXT("서버") : TEXT("Client");
 	//PRINTLOG(TEXT("%s"), *isSercer);
-	if (OrderList.Num() < 1 || PosActor->GetCustomer() == nullptr) return;
+	if (OrderList.Num() < 1) return;
 	
 	PosActor->OrderMap.FindOrAdd(PosActor->OrderNum) = {PosActor->GetCustomer(), OrderList};
 	//PRINTLOG(TEXT("%d, %d"), OrderNum, OrderMap[OrderNum].Menus.Num());
@@ -161,22 +161,11 @@ void UCounterUI::OrderMenuBtnRPC()
 	}
 	
 	//TODO : AI가 주문을 마친 후 로직 추가
-	if (PosActor->GetCustomer() == nullptr)
-	{
-		UE_LOG(LogTemp, Display, TEXT("fuckyou"));
-		
-	}
-	if (PosActor->GetCustomer()->fsm)
-	{
-	PosActor->GetCustomer()->fsm->FinishOrder();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Display, TEXT("wtfstop"));
-	}
+	if (PosActor->GetCustomer() != nullptr)
+		PosActor->GetCustomer()->fsm->FinishOrder();
+
 	
 	PosActor->ServerRPC_SetCustomer(nullptr);
-
 	PosActor->OrderNum++;
 	DeleteListBtn();
 }
@@ -208,7 +197,12 @@ void UCounterUI::OnMenuReadyBtnRPC()
 			S->SetColumn(Col);
 		}
 	}
-	//TODO : 손님 호출
+
+	if (CustomerBtn->GetCustomer() != nullptr)
+	{
+		//TODO : 손님 호출
+		
+	}
 	
 	CustomerBtn = nullptr;
 }
