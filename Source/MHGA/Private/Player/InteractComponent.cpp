@@ -83,8 +83,7 @@ void UInteractComponent::MulticastRPC_InteractIngContainer_Implementation(AIngre
 		UPrimitiveComponent* Comp = Ingredient->GetMeshComp();
 		Comp->SetSimulatePhysics(false);
 		Comp->SetCollisionProfileName(TEXT("Grabbed"));
-		HoldDistance = FVector::Dist(Owner->GetFirstPersonCameraComponent()->GetComponentLocation(), Ingredient->GetActorLocation());
-		HoldDistance = FMath::Clamp(HoldDistance, 50, 200);
+		HoldDistance = 100.f;
 		Ingredient->AttachToComponent(Owner->GetFirstPersonCameraComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 		Ingredient->SetLocation(Owner->GetFirstPersonCameraComponent()->GetComponentLocation() + Owner->GetFirstPersonCameraComponent()->GetForwardVector() * HoldDistance);
 
