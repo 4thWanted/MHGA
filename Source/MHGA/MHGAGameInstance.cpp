@@ -1,0 +1,134 @@
+#include "MHGAGameInstance.h"
+#include "OnlineSubsystem.h"
+#include "OnlineSubsystemUtils.h"
+#include "OnlineSessionSettings.h"
+#include "Online/OnlineSessionNames.h"
+
+void UMHGAGameInstance::Init()
+{
+	Super::Init();
+
+	IOnlineSubsystem* subsys = Online::GetSubsystem(GetWorld());
+	if (subsys)
+	{
+		SessionInterface = subsys->GetSessionInterface();
+		SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UMHGAGameInstance::OnCreateSessionComplete);
+		SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UMHGAGameInstance::OnFindSessionComplete);
+		SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UMHGAGameInstance::OnJoinSessionComplete);
+	}
+}
+
+void UMHGAGameInstance::CreateMySession(FString displayName, int32 playerCount)
+{
+	//세선을 만들기 위한 옵션담을 변수
+	FOnlineSessionSettings SessionSettings;
+	//현재 사용중인 서브시스템 이름 - steam이면 steam 들어옴, null이면 null들어옴
+	FName SubsystemName = Online::GetSubsystem(GetWorld())->GetSubsystemName();
+	//서브시스템 이름이 NULL이면 Lan 이용하게 설정
+	SessionSettings.bIsLANMatch = SubsystemName.IsEqual(FName(TEXT("NULL")));
+
+	//**Steam에서 필수**
+	//Lobby 사용 여부, 친구 상태 확인 여부
+	SessionSettings.bUseLobbiesIfAvailable = true;
+	SessionSettings.bUsesPresence = true;
+
+	//세션 검색 허용 여부
+	SessionSettings.bShouldAdvertise = true;
+	//세션 최대 참여 인원 설정
+	SessionSettings.NumPublicConnections = playerCount;
+	//커스텀 정보	- Key,Value값
+	SessionSettings.Set(FName("DP_NAME"), displayName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+
+	//sessionSettings 이용해서 세션 생성
+	FUniqueNetIdPtr netId = GetWorld()->GetFirstLocalPlayerFromController()->GetUniqueNetIdForPlatformUser().GetUniqueNetId();
+	SessionInterface->CreateSession(*netId, FName(displayName), SessionSettings);
+}
+
+void UMHGAGameInstance::OnCreateSessionComplete(FName sessionName, bool bWasSuccessful)
+{
+	if (bWasSuccessful)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s 세션 생성 성공"), *sessionName.ToString())
+
+		//레벨 이동 - 정확한 경로 적어야됨, 생성자에서 한 것처럼 하면 안됨
+		GetWorld()->ServerTravel(TEXT("/Game/ThirdPerson/Lvl_ThirdPerson"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s 세션 생성 실패"), *sessionName.ToString())
+	}
+}
+
+void UMHGAGameInstance::FindOtherSession()
+{
+	UE_LOG(LogTemp, Warning, TEXT("세션 조회 시작"));
+	//sessionsearch 생성
+	SessionSearch = MakeShared<FOnlineSessionSearch>();
+	//현재 사용중인 서브시스템 이름 - steam이면 steam 들어옴, null이면 null들어옴
+	FName subsystemName = Online::GetSubsystem(GetWorld())->GetSubsystemName();
+	//서브시스템 이름이 NULL이면 Lan 이용하게 설정
+	SessionSearch->bIsLanQuery = subsystemName.IsEqual(FName(TEXT("NULL")));
+	//어떤 옵션을 기준으로 검색 - 스팀에선 꼭 필요
+	SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
+	//커스텀 한 거로 찾고싶다 하면
+	//sessionSearch->QuerySettings.Set(FName("DP_NAME"), FName("Wanted"), EOnlineComparisonOp::Equals);
+
+	//검색 갯수 제한
+	SessionSearch->MaxSearchResults = 100;
+	//위 설정을 가지고 세션 조회
+	SessionInterface->FindSessions(0,SessionSearch.ToSharedRef());
+}
+
+void UMHGAGameInstance::OnFindSessionComplete(bool bWasSuccessful)
+{
+	UE_LOG(LogTemp, Warning, TEXT("세션 조회 완료"));
+	if (bWasSuccessful)
+	{
+		//검색된 세션 결과물
+		auto results = SessionSearch->SearchResults;
+		for (int32 i = 0; i < results.Num(); i++)
+		{
+			//세션 이름 담을 변수
+			FString displayName;
+			results[i].Session.SessionSettings.Get(FName("DP_NAME"), displayName);
+			UE_LOG(LogTemp, Warning, TEXT("세션 : %i, 이름 : %s"), i, *displayName)
+		}
+	}
+	else
+	{
+	UE_LOG(LogTemp, Warning, TEXT("세션 조회 실패"));
+	}
+}
+
+void UMHGAGameInstance::JoinOtherSession(int32 sessionIdx)
+{
+	//검색된 세션 결과물
+	auto results = SessionSearch->SearchResults;
+	//5.5 이후 바뀜 -> 아래 2개는 무조건 세팅한 것과 맞춰줘야됨
+	results[sessionIdx].Session.SessionSettings.bUseLobbiesIfAvailable = true;
+	results[sessionIdx].Session.SessionSettings.bUsesPresence = true;
+
+	//세션 이름
+	FString displayName;
+	results[sessionIdx].Session.SessionSettings.Get(FName("DP_NAME"), displayName);
+	
+	//세션 참여
+	SessionInterface->JoinSession(0, FName(displayName), results[sessionIdx]);
+}
+
+void UMHGAGameInstance::OnJoinSessionComplete(FName sessionName, EOnJoinSessionCompleteResult::Type result)
+{
+	//참여에 성공 했다면
+	if (result == EOnJoinSessionCompleteResult::Success)
+	{
+		//서버가 만들어 놓은 세션 URL 얻기
+		FString url;
+		SessionInterface->GetResolvedConnectString(sessionName, url);
+		UE_LOG(LogTemp, Warning, TEXT("URL : %s"), *url);
+
+		//서버가 있는 맵으로 이동 (최초에 한 번만)
+		APlayerController* pc = GetWorld()->GetFirstPlayerController();
+		
+		//pc->ClientTravel(url, TRAVEL_Absolute);
+	}
+}
