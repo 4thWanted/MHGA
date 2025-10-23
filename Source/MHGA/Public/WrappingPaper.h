@@ -78,12 +78,10 @@ protected:
 
 
 private:
-	// TODO(human): 이 배열을 모든 클라이언트에 복제되도록 설정
-	// 고려사항: 배열이 변경될 때 클라이언트에 알림을 줄 것인가?
 	UPROPERTY(ReplicatedUsing=OnRep_AddIng)	// 충돌한 재료 저장
 	TArray<FIngredientStack> OnAreaIngredients;
 
-	UPROPERTY()				// 완료 시 제거할 액터 추적
+	UPROPERTY()		// 완료 시 제거할 액터 추적
 	TArray<TWeakObjectPtr<AActor>> OverlappingActors;
 
 	
