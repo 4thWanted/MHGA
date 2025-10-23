@@ -4,6 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "LobbyUI.generated.h"
 
+class UBoardText;
 class UVerticalBox;
 class UTextBlock;
 class ALobbyBoard;
@@ -16,16 +17,18 @@ class MHGA_API ULobbyUI : public UUserWidget
 
 protected:
 	virtual void NativeConstruct() override;
-
+	
 protected:
 	UPROPERTY()
 	ALobbyBoard* LobbyBoard;
 
+	//버티컬 박스
 	UPROPERTY(meta=(BindWidget))
 	UVerticalBox* VB_Player;
 	UPROPERTY(meta=(BindWidget))
 	UVerticalBox* VB_Ready;
 
+	//레디, 도망 버튼
 	UPROPERTY(meta=(BindWidget))
 	UButton* BTN_Ready;
 	UPROPERTY(meta=(BindWidget))
@@ -33,13 +36,17 @@ protected:
 	UPROPERTY(meta=(BindWidget))
 	UButton* BTN_Run;
 
+	//플레이어 텍스트 어레이
+	TArray<bool> IsPlayerReady;
 	UPROPERTY()
 	TArray<UTextBlock*> PlayerArr;
 	UPROPERTY()
 	TArray<UTextBlock*> ReadyArr;
+	
+	//생성할 보드 텍스트
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UBoardText> BoardText;
 
-	int32 PlayerCount;
-	TArray<bool> IsPlayerReady;
 
 public:
 	void Init(ALobbyBoard* InLobbyBoard);
@@ -48,5 +55,5 @@ public:
 	
 	UFUNCTION() void Ready(int32 PlayerNum);
 	UFUNCTION() void Run();
-	UFUNCTION() void Refresh(int32 PlayerNum);
+	UFUNCTION() void Refresh(TArray<FString>& Names);
 };

@@ -9,6 +9,8 @@
 #include "MHGAGameState.h"
 #include "Counter/CounterPOS.h"
 #include "Lobby/LobbyBoard.h"
+#include "Lobby/LobbyGameMode.h"
+#include "Lobby/LobbyGameState.h"
 
 AMHGAPlayerController::AMHGAPlayerController()
 {
@@ -23,8 +25,11 @@ void AMHGAPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	AMHGAGameState* gs = Cast<AMHGAGameState>(GetWorld()->GetGameState());
-	CounterPos = gs->GetCounter();
+	if (AMHGAGameState* gs = Cast<AMHGAGameState>(GetWorld()->GetGameState()))
+		CounterPos = gs->GetCounter();	
+
+	if (ALobbyGameState* lgs = GetWorld()->GetGameState<ALobbyGameState>())
+		LobbyBoard = lgs->GetBoard();
 }
 
 void AMHGAPlayerController::SetupInputComponent()

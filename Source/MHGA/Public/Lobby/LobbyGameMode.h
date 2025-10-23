@@ -17,11 +17,5 @@ class MHGA_API ALobbyGameMode : public AGameModeBase
 
 protected:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
-
-protected:
-	UPROPERTY(EditAnywhere)
-	ALobbyBoard* LobbyBoard;
-
-public:
-	void SetLobbyBoard(ALobbyBoard* InLobbyBoard){LobbyBoard = InLobbyBoard;}
+	virtual void Logout(AController* Exiting) override;
 };

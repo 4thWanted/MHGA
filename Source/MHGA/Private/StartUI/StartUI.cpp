@@ -7,6 +7,7 @@
 #include "OnlineSessionSettings.h"
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
+#include "Components/EditableText.h"
 #include "Components/EditableTextBox.h"
 #include "Components/UniformGridPanel.h"
 #include "StartUI/JobButtonUI.h"
@@ -25,6 +26,7 @@ void UStartUI::NativeConstruct()
 	GI = Cast<UMHGAGameInstance>(GetGameInstance());
 	GI->FindCompleteDelegate.BindUObject(this, &UStartUI::OnFindComplete);
 
+	Btn_Login->OnClicked.AddDynamic(this, &UStartUI::OnClickLoginBtn);
 	Btn_SearchJob->OnClicked.AddDynamic(this, &UStartUI::OnClickSearchBtn);
 	Btn_Refresh->OnClicked.AddDynamic(this, &UStartUI::OnClickRefreshBtn);
 	Btn_MakeJob->OnClicked.AddDynamic(this, &UStartUI::OnClickMakeJobBtn);
@@ -33,8 +35,20 @@ void UStartUI::NativeConstruct()
 
 	Input_Number->OnTextChanged.AddDynamic(this, &UStartUI::OnInputNumChange);
 
+	Canvas_Start->SetVisibility(ESlateVisibility::Hidden);
 	Canvas_Session->SetVisibility(ESlateVisibility::Hidden);
 	Canvas_MakeJob->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UStartUI::OnClickLoginBtn()
+{
+	if (Input_Login->GetText().ToString().Len() > 0)
+	{
+		GI->SetPlayerName(Input_Login->GetText().ToString());
+	}
+
+	Canvas_Login->SetVisibility(ESlateVisibility::Hidden);
+	Canvas_Start->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UStartUI::OnClickSearchBtn()

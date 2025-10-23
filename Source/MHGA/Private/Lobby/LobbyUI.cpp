@@ -1,14 +1,11 @@
 #include "Lobby/LobbyUI.h"
 
 #include "MHGA.h"
-#include "OnlineSessionSettings.h"
-#include "OnlineSubsystem.h"
-#include "OnlineSubsystemUtils.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "GameFramework/GameStateBase.h"
-#include "Interfaces/OnlineSessionInterface.h"
+#include "Lobby/BoardText.h"
 #include "Lobby/LobbyBoard.h"
 #include "Player/MHGAPlayerController.h"
 
@@ -24,18 +21,6 @@ void ULobbyUI::NativeConstruct()
 
 	BTN_Ready->OnClicked.AddDynamic(this, &ULobbyUI::OnClickReady);
 	BTN_Run->OnClicked.AddDynamic(this, &ULobbyUI::OnClickRun);
-
-	IsPlayerReady.Init(false, 4);
-	for (int i = 0; i<VB_Player->GetChildrenCount(); i++)
-	{
-		PlayerArr.Add(Cast<UTextBlock>(VB_Player->GetChildAt(i)));
-		ReadyArr.Add(Cast<UTextBlock>(VB_Ready->GetChildAt(i)));
-	}
-
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	AGameStateBase* GS = GetWorld()->GetGameState();
-	PlayerCount = GS->PlayerArray.IndexOfByKey(PC->PlayerState);
-	Refresh(PlayerCount);
 }
 
 void ULobbyUI::Init(ALobbyBoard* InLobbyBoard)
@@ -64,8 +49,8 @@ void ULobbyUI::Ready(int32 PlayerNum)
 {
 	if (LobbyBoard->HasAuthority())
 	{
-		IsPlayerReady[0] = true;
-		for (int32 i = 0; i<PlayerCount; i++)
+		//IsPlayerReady[0] = true;
+		for (int32 i = 0; i<PlayerNum; i++)
 		{
 			if (IsPlayerReady[i] == false)
 				return;
@@ -76,8 +61,9 @@ void ULobbyUI::Ready(int32 PlayerNum)
 	}
 	else
 	{
-		ReadyArr[PlayerNum]->SetText(FText::FromString(TEXT("준비 완료")));
-		IsPlayerReady[PlayerNum] = true;
+		//ReadyArr[PlayerNum]->SetText(FText::FromString(TEXT("준비 완료")));
+		//IsPlayerReady[PlayerNum] = true;
+		PRINTINFO();
 	}
 }
 
@@ -85,12 +71,15 @@ void ULobbyUI::Run()
 {
 }
 
-void ULobbyUI::Refresh(int32 PlayerNum)
+void ULobbyUI::Refresh(TArray<FString>& Names)
 {
-	PlayerCount = PlayerNum;
-	for (int i = 0; i<=PlayerNum; i++)
+	VB_Player->ClearChildren();
+	//VB_Ready->ClearChildren();
+
+	for (const FString& Name : Names)
 	{
-		PlayerArr[i]->SetVisibility(ESlateVisibility::Visible);
-		ReadyArr[i]->SetVisibility(ESlateVisibility::Visible);
+		UBoardText* bt = CreateWidget<UBoardText>(GetWorld(), BoardText);
+		bt->Init(Name);
+		VB_Player->AddChildToVerticalBox(bt);
 	}
 }

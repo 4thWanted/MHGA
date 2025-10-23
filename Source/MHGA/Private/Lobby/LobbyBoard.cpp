@@ -1,13 +1,15 @@
 #include "Lobby/LobbyBoard.h"
 
-#include "LobbyGameMode.h"
+#include "Lobby/LobbyGameMode.h"
 #include "Components/WidgetComponent.h"
+#include "Lobby/LobbyGameState.h"
 #include "Lobby/LobbyUI.h"
+#include "Net/UnrealNetwork.h"
 #include "Player/MHGAPlayerController.h"
 
 ALobbyBoard::ALobbyBoard()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	SetRootComponent(MeshComponent);
@@ -39,19 +41,18 @@ void ALobbyBoard::BeginPlay()
 	LobbyUI = Cast<ULobbyUI>(WidgetComponent->GetWidget());
 	if (LobbyUI)
 		LobbyUI->Init(this);
+
+	LGS = GetWorld()->GetGameState<ALobbyGameState>();
+	LGS->OnPlayerNamesChanged.AddDynamic(this, &ALobbyBoard::OnPlayerNameChange);
+	LGS->SetBoard(this);
 	
-	AMHGAPlayerController* pc = Cast<AMHGAPlayerController>(GetWorld()->GetFirstPlayerController());
-	pc->SetLobbyBoard(this);
-	ALobbyGameMode* gm = Cast<ALobbyGameMode>(GetWorld()->GetAuthGameMode());
-	if (gm)
-		gm->SetLobbyBoard(this);
+	OnPlayerNameChange();
 }
 
-void ALobbyBoard::Tick(float DeltaTime)
+void ALobbyBoard::OnPlayerNameChange()
 {
-	Super::Tick(DeltaTime);
+	LobbyUI->Refresh(LGS->GetPlayerNames());
 }
-
 
 void ALobbyBoard::MulticastRPC_Ready_Implementation(int32 PlayerNum)
 {
@@ -61,9 +62,4 @@ void ALobbyBoard::MulticastRPC_Ready_Implementation(int32 PlayerNum)
 void ALobbyBoard::MulticastRPC_Run_Implementation()
 {
 	LobbyUI->Run();
-}
-
-void ALobbyBoard::MulticastRPC_Refresh_Implementation(int32 PlayerNum)
-{
-	LobbyUI->Refresh(PlayerNum);
 }

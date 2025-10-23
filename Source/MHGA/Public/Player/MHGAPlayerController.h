@@ -54,7 +54,6 @@ public:
 	void ServerRPC_CustomerOrderedMenu(int32 CustomerNum);
 
 	//Lobby
-	void SetLobbyBoard(ALobbyBoard* InLobbyBoard) {LobbyBoard = InLobbyBoard;}
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_Ready(int32 PlayerNum);
 	UFUNCTION(Server, Reliable)

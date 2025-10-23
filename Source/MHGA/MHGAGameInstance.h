@@ -21,6 +21,8 @@ public:
 	FFindComplete FindCompleteDelegate;
 	
 protected:
+	FString NickName = FString(TEXT("Player"));
+	
 	//세션 모든 처리를 진행하는 객체
 	IOnlineSessionPtr SessionInterface;
 	
@@ -53,5 +55,9 @@ public:
 	//세션 참여 함수
 	UFUNCTION(BlueprintCallable)
 	void JoinOtherSession(int32 sessionIdx);
+
+	//닉네임 설정
+	void SetPlayerName(FString name) {NickName = name; }
+	FString GetPlayerName() {return NickName;}
 };
 
