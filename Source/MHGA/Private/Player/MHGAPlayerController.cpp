@@ -8,6 +8,9 @@
 #include "MHGACameraManager.h"
 #include "MHGAGameState.h"
 #include "Counter/CounterPOS.h"
+#include "Lobby/LobbyBoard.h"
+#include "Lobby/LobbyGameMode.h"
+#include "Lobby/LobbyGameState.h"
 
 AMHGAPlayerController::AMHGAPlayerController()
 {
@@ -22,8 +25,11 @@ void AMHGAPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	AMHGAGameState* gs = Cast<AMHGAGameState>(GetWorld()->GetGameState());
-	CounterPos = gs->GetCounter();
+	if (AMHGAGameState* gs = Cast<AMHGAGameState>(GetWorld()->GetGameState()))
+		CounterPos = gs->GetCounter();	
+
+	if (ALobbyGameState* lgs = GetWorld()->GetGameState<ALobbyGameState>())
+		LobbyBoard = lgs->GetBoard();
 }
 
 void AMHGAPlayerController::SetupInputComponent()
@@ -71,4 +77,15 @@ void AMHGAPlayerController::ServerRPC_AddMenuToList_Implementation(const EBurger
 void AMHGAPlayerController::ServerRPC_CustomerOrderedMenu_Implementation(int32 CustomerNum)
 {
 	CounterPos->MulticastRPC_CustomerOrderedMenu(CustomerNum);
+}
+
+
+void AMHGAPlayerController::ServerRPC_Ready_Implementation(int32 PlayerNum)
+{
+	LobbyBoard->MulticastRPC_Ready(PlayerNum);
+}
+
+void AMHGAPlayerController::ServerRPC_Run_Implementation()
+{
+	LobbyBoard->MulticastRPC_Run();
 }

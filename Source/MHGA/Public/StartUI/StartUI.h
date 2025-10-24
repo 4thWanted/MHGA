@@ -4,6 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "StartUI.generated.h"
 
+class UEditableText;
 class UJobButtonUI;
 class UMHGAGameInstance;
 class UEditableTextBox;
@@ -27,8 +28,16 @@ protected:
 	UMHGAGameInstance* GI;
 	UPROPERTY()
 	TSubclassOf<UJobButtonUI> JobBtn;
+
+	//Login
+	UPROPERTY(meta=(BindWidget))
+	UCanvasPanel* Canvas_Login;
+	UPROPERTY(meta=(BindWidget))
+	UEditableText* Input_Login;
+	UPROPERTY(meta=(BindWidget))
+	UButton* Btn_Login;
 	
-	
+	//Start
 	UPROPERTY(meta=(BindWidget))
 	UCanvasPanel* Canvas_Start;
 	UPROPERTY(meta=(BindWidget))
@@ -61,6 +70,7 @@ protected:
 
 
 protected:
+	UFUNCTION() void OnClickLoginBtn();
 	UFUNCTION() void OnClickSearchBtn();
 	UFUNCTION() void OnClickRefreshBtn();
 	UFUNCTION() void OnClickMakeJobBtn();

@@ -7,6 +7,7 @@
 #include "OnlineSessionSettings.h"
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
+#include "Components/EditableText.h"
 #include "Components/EditableTextBox.h"
 #include "Components/UniformGridPanel.h"
 #include "StartUI/JobButtonUI.h"
@@ -25,6 +26,7 @@ void UStartUI::NativeConstruct()
 	GI = Cast<UMHGAGameInstance>(GetGameInstance());
 	GI->FindCompleteDelegate.BindUObject(this, &UStartUI::OnFindComplete);
 
+	Btn_Login->OnClicked.AddDynamic(this, &UStartUI::OnClickLoginBtn);
 	Btn_SearchJob->OnClicked.AddDynamic(this, &UStartUI::OnClickSearchBtn);
 	Btn_Refresh->OnClicked.AddDynamic(this, &UStartUI::OnClickRefreshBtn);
 	Btn_MakeJob->OnClicked.AddDynamic(this, &UStartUI::OnClickMakeJobBtn);
@@ -33,8 +35,20 @@ void UStartUI::NativeConstruct()
 
 	Input_Number->OnTextChanged.AddDynamic(this, &UStartUI::OnInputNumChange);
 
+	Canvas_Start->SetVisibility(ESlateVisibility::Hidden);
 	Canvas_Session->SetVisibility(ESlateVisibility::Hidden);
 	Canvas_MakeJob->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UStartUI::OnClickLoginBtn()
+{
+	if (Input_Login->GetText().ToString().Len() > 0)
+	{
+		GI->SetPlayerName(Input_Login->GetText().ToString());
+	}
+
+	Canvas_Login->SetVisibility(ESlateVisibility::Hidden);
+	Canvas_Start->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UStartUI::OnClickSearchBtn()
@@ -70,8 +84,8 @@ void UStartUI::OnClickRegisterJobBtn()
 	FString AlbaName = Input_Name->GetText().ToString();
 	int32 Number = FCString::Atoi(*Input_Number->GetText().ToString());
 
+	//OnClickMakeJobExitBtn();
 	GI->CreateMySession(AlbaName, Number);
-	OnClickMakeJobExitBtn();
 }
 
 void UStartUI::OnInputNumChange(const FText& Text)
@@ -104,7 +118,7 @@ void UStartUI::OnFindComplete(TArray<FOnlineSessionSearchResult>& Results)
 	for (int i = 0; i<Results.Num(); i++)
 	{
 		FString DisplayName; //세션 이름
-		int32 MaxPlayers = Results[i].Session.SessionSettings.NumPublicConnections; // 최대 플레이어 수
+		int32 MaxPlayers = Results[i].Session.SessionSettings.NumPublicConnections + 1; // 최대 플레이어 수
 		int32 CurrentPlayers = MaxPlayers - Results[i].Session.NumOpenPublicConnections; // 현재 플레이어 수
 		Results[i].Session.SessionSettings.Get(FName("NAME"), DisplayName);
 		UE_LOG(LogTemp, Warning, TEXT("세션: %i, 이름: %s, 인원: %d/%d"), i, *DisplayName, CurrentPlayers, MaxPlayers);
