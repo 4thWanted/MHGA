@@ -119,33 +119,34 @@ void UCustomerFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 
 void UCustomerFSM::SetState(EAIState NewState)
 {
+	// 서버에서만 실행
 	if (!GetOwner()->HasAuthority()) return;
 	
 	// 이전과 같은 상태라면 함수에서 나가기
 	if (curState == NewState) return;
 	
 	curState = NewState;
-
 	HandleStateEnter(curState);
 	
+	if (me)
+	{
+		if (curState == EAIState::Ordering)
+		{
+			me->ShowCustomerDialogue();
+		}
+	}
 }
 
 void UCustomerFSM::OnRep_StateChange()
 {
 	// 클라이언트에서만 실행
 	if (GetOwner()->HasAuthority()) return;
-	// 상태 진입(동기화)
-	HandleStateEnter(curState);
 
 	if (me)
 	{
 		if (curState == EAIState::Ordering)
 		{
-			me->ShowOrderUI();
-		}
-		else
-		{
-			me->HideOrderUI();
+			me->ShowCustomerDialogue();
 		}
 	}
 
@@ -157,22 +158,21 @@ void UCustomerFSM::OnRep_Dialogue()
 	{
 		if (UCustomerUI* orderWidget = Cast<UCustomerUI>(me->customerWidget->GetUserWidgetObject()))
 		{
-			orderWidget->Event_SetOrderText(curDialogue);
+			me->ShowCustomerDialogue();
 		}
 	}
 }
 
 void UCustomerFSM::HandleStateEnter(EAIState state)
 {	
+	if (!GetOwner()->HasAuthority()) return;
 	StopWandering();
 	
 	switch (state)
 	{
 	case EAIState::GoingToLine:
 		{
-			// 줄서기 위치까지 이동
-			if (!GetOwner()->HasAuthority()) return;
-			
+			// 줄서기 위치까지 이동			
 			if (orderTarget)
 			{
 				MoveToTarget(orderTarget);
@@ -197,7 +197,6 @@ void UCustomerFSM::HandleStateEnter(EAIState state)
 
 	case EAIState::Ordering:
 		{
-			if (GetOwner()->HasAuthority())
 			{
 				UE_LOG(LogTemp, Warning, TEXT("주문중"))
 				StartOrder();
@@ -329,7 +328,7 @@ void UCustomerFSM::StartOrder()
 	// 랜덤으로 선택된 정수를 enum 타입으로 변환해 변수에 저장한다
 	orderedMenu = static_cast<EBurgerMenu>(RandomMenuIndex);
 
-	// UEnum*을 찾아 enum 값을 문자열로 변환합니다.
+	// UEnum을 찾아 enum 값을 문자열로 변환
 	const UEnum* BurgerEnum = FindObject<UEnum>(nullptr, TEXT("/Script/MHGA.EBurgerMenu"), true);
 	if (BurgerEnum)
 	{
@@ -337,21 +336,19 @@ void UCustomerFSM::StartOrder()
 		UE_LOG(LogTemp, Warning, TEXT("주문 메뉴 결정: %s"), *EnumAsString);
 	}
 	
-	curDialogue = GetOrderedMenuAsText();
 	orderQuantity = FMath::RandRange(1, 3);
-	UE_LOG(LogTemp, Error, TEXT("%s"), *curDialogue.ToString());
-	
-	// me->ShowOrderUI();
+	curDialogue = GetOrderedMenuAsText();
+	UE_LOG(LogTemp, Error, TEXT("현재 대사 : %s, 현재 수량 : %d"), *curDialogue.ToString(), orderQuantity);
 }
 
 void UCustomerFSM::OnRep_Order()
 {
-	me->ShowOrderUI();
+	me->ShowCustomerDialogue();
 }
 
 FText UCustomerFSM::GetOrderedMenuAsText()
 {
-	if (!MenuDialogueTable) return FText::GetEmpty();
+		if (!MenuDialogueTable) return FText::GetEmpty();
 	
 	// Enum 값(EBurgerMenu::BigMac)을 FName("BigMac")으로 변환
     // (데이터 테이블의 Row Name과 일치해야 함)
@@ -418,7 +415,7 @@ void UCustomerFSM::FinishOrder()
 		if (manager)
 		{
 			manager->OnCustomerFinished(me);
-			me->HideOrderUI();
+			me->HideCustomerDialogue();
 			SetState(EAIState::WaitingForFood);
 			UE_LOG(LogTemp, Error, TEXT("주문 완료"));
 		}
@@ -474,13 +471,13 @@ void UCustomerFSM::CheckAndTakeFood()
 				OrderedMenuName = BurgerEnum->GetNameStringByValue(static_cast<int64>(orderedMenu));
 			}
 
-			// --- 2. 햄버거 액터에서 FString 이름을 가져옴 ---
+			// 햄버거 액터에서 FString 이름을 가져옴
 			FString TakenBurgerName = TakenHamburger->GetBurgerName();
 
-			// --- 3. 두 FString을 비교 ---
+			// 두 FString을 비교
 			if (OrderedMenuName == TakenBurgerName)
 			{
-				// 평점 올리기
+				// 같은 값이면 평점 올리기
 				gm->ReportScoreChanged(EScoreChangeReason::CorrectFood, gm->bonusCorrectFood);
 				me->ShowScoreFeedback(EScoreChangeReason::CorrectFood);
 				UE_LOG(LogTemp, Log, TEXT("주문한 메뉴와 동일! 만족!"));
@@ -488,7 +485,7 @@ void UCustomerFSM::CheckAndTakeFood()
 			}
 			else
 			{
-				// 평점 깎기
+				// 다른 음식이면 평점 깎기
 				gm->ReportScoreChanged(EScoreChangeReason::WrongFood, gm->penaltyWrongFood);
 				me->ShowScoreFeedback(EScoreChangeReason::WrongFood);
 				UE_LOG(LogTemp, Warning, TEXT("다른 메뉴를 받음! 주문: %s, 받은 것: %s"), *OrderedMenuName, *TakenBurgerName);

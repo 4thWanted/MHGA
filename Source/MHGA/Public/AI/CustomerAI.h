@@ -34,13 +34,15 @@ public:
 	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadOnly, Category = "UI")
 	class UWidgetComponent* customerWidget;
 
+	// 대사 데이터 테이블
 	UPROPERTY(EditDefaultsOnly, Category = "AI Dialogue")
-	class UDataTable* scoreDialogueTable;
+	UDataTable* scoreDialogueTable;
 	
+	// 서버에서만 실행
 	UFUNCTION(BlueprintCallable, Category = "AI Order")
-	void ShowOrderUI();
+	void ShowCustomerDialogue();
 	UFUNCTION(BlueprintCallable, Category = "AI Order")
-	void HideOrderUI();
+	void HideCustomerDialogue();
 
 	// 대사 가져오기
 	FText GetScoreDialogue(EScoreChangeReason reason);
@@ -50,14 +52,12 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_ShowScoreFeedback(EScoreChangeReason reason);
 
-	// --- Replication Callbacks ---
+	// RepNotify 
 	UFUNCTION()
 	void OnRep_FSMStateChanged();
     
 	/** 실제 위젯 인스턴스를 가져옵니다 (필요시 초기화 포함). */
 	class UCustomerUI* GetCustomerUIInstance();
 
-	
-
-	void UpdateCustomerWidget(bool bShow, const FText& textToShow, FLinearColor textColor);
+	void UpdateCustomerWidget(bool bShow, const FText& textToShow = FText::GetEmpty(), FLinearColor textColor = FLinearColor::White);
 };

@@ -28,7 +28,7 @@ ACustomerAI::ACustomerAI()
 	
 	customerWidget->SetRelativeLocation(FVector(0, 0, 100));
 	customerWidget->SetDrawSize(FVector2D(350, 70));
-	customerWidget->SetPivot(FVector2D(0.5f, 1.0f));
+	customerWidget->SetPivot(FVector2D(0.5f, 0.5f));
 	
 	customerWidget->SetVisibility(false);
 	customerWidget->SetIsReplicated(true);
@@ -75,7 +75,7 @@ void ACustomerAI::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ACustomerAI, fsm); 
-	DOREPLIFETIME(ACustomerAI, customerWidget); 
+	DOREPLIFETIME(ACustomerAI, customerWidget);
 }
 
 FText ACustomerAI::GetScoreDialogue(EScoreChangeReason reason)
@@ -123,28 +123,21 @@ FText ACustomerAI::GetScoreDialogue(EScoreChangeReason reason)
 	return (*variations)[RandomIndex];
 }
 
-void ACustomerAI::ShowOrderUI()
-{
+void ACustomerAI::ShowCustomerDialogue()
+{	
 	UCustomerUI* customerUI = GetCustomerUIInstance();
 	if (fsm && customerUI)
 	{
-		customerUI->Event_SetOrderText(fsm->curDialogue);
+		UpdateCustomerWidget(true, fsm->curDialogue, FLinearColor::White);
 	}
 }
-
-void ACustomerAI::HideOrderUI()
+void ACustomerAI::HideCustomerDialogue()
 {
 	UCustomerUI* customerUI = GetCustomerUIInstance();
 	if (customerUI)
 	{
-		customerUI->SetVisibility(ESlateVisibility::Hidden);
+		UpdateCustomerWidget(false);
 	}
-}
-
-void ACustomerAI::ShowScoreFeedback(EScoreChangeReason reason)
-{
-	if (!HasAuthority()) return;
-	Multicast_ShowScoreFeedback(reason);
 }
 
 void ACustomerAI::OnRep_FSMStateChanged()
@@ -155,12 +148,12 @@ void ACustomerAI::OnRep_FSMStateChanged()
 	if (fsm->curState == EAIState::Ordering)
 	{
 		// 주문 상태면 주문 대사 표시 요청 (대사는 FSM의 OnRep_Dialogue에서 업데이트될 수 있음)
-		customerUI->Event_SetOrderText(fsm->curDialogue);
+		UpdateCustomerWidget(true, fsm->curDialogue, FLinearColor::White);
 	}
 	else
 	{
 		// 주문 상태가 아니면 무조건 숨김
-		customerUI->SetVisibility(ESlateVisibility::Hidden);
+		UpdateCustomerWidget(false);
 	}
 }
 
@@ -177,6 +170,12 @@ class UCustomerUI* ACustomerAI::GetCustomerUIInstance()
 	return Cast<UCustomerUI>(widgetInst);
 }
 
+void ACustomerAI::ShowScoreFeedback(EScoreChangeReason reason)
+{
+	if (!HasAuthority()) return;
+	Multicast_ShowScoreFeedback(reason);
+}
+
 // 모든 클라이언트에서 실행
 void ACustomerAI::Multicast_ShowScoreFeedback_Implementation(EScoreChangeReason reason)
 {
@@ -190,18 +189,22 @@ void ACustomerAI::Multicast_ShowScoreFeedback_Implementation(EScoreChangeReason 
 	if (!FeedbackDialogue.IsEmpty())
 	{
 		FLinearColor FeedbackColor = (reason == EScoreChangeReason::CorrectFood) ? FLinearColor::White : FLinearColor::Red;
-		customerUI->Event_SetOrderText(FeedbackDialogue);
-		customerUI->Event_SetTextColor(FeedbackColor);
+		UpdateCustomerWidget(true, FeedbackDialogue, FeedbackColor);
 	}
 }
 
-
-
-
 void ACustomerAI::UpdateCustomerWidget(bool bShow, const FText& textToShow, FLinearColor textColor)
 {
-	if (!customerWidget) return;
+	if (!customerWidget)
+	{
+		UE_LOG(LogTemp, Error, TEXT("UpdateCustomerWidget 실패: customerWidget가 null입니다!"));
+		return;
+	}
 
+	// 1. 함수가 호출되는지, 텍스트가 비어있는지 확인
+	UE_LOG(LogTemp, Warning, TEXT("UpdateCustomerWidget 호출됨. bShow: %s, Text: '%s'"),
+		bShow ? TEXT("True") : TEXT("False"), *textToShow.ToString());
+	
 	// 위젯 표시/숨김 처리
 	customerWidget->SetVisibility(bShow);
 
@@ -212,13 +215,22 @@ void ACustomerAI::UpdateCustomerWidget(bool bShow, const FText& textToShow, FLin
 		UUserWidget* widgetInst = customerWidget->GetUserWidgetObject();
 		if (widgetInst == nullptr && customerWidget->GetWidgetClass())
 		{
+			UE_LOG(LogTemp, Log, TEXT("위젯 인스턴스가 없어 InitWidget() 호출함."));
 			customerWidget->InitWidget();
 			widgetInst = customerWidget->GetUserWidgetObject();
 		}
 
+		if (widgetInst == nullptr)
+		{
+			// 2. Widget Class가 할당되지 않았는지 확인
+			UE_LOG(LogTemp, Error, TEXT("UpdateCustomerWidget 실패: 위젯 인스턴스가 null입니다. Widget Class가 할당되었나요?"));
+			return;
+		}
+		
 		// 위젯 함수 호출하여 텍스트, 색상 설정
 		if (UCustomerUI* customerUI = Cast<UCustomerUI>(widgetInst))
 		{
+			UE_LOG(LogTemp, Warning, TEXT("UpdateCustomerWidget 성공: 텍스트를 '%s'로 설정합니다."), *textToShow.ToString());
 			customerUI->Event_SetOrderText(textToShow);
 			customerUI->Event_SetTextColor(textColor);
 

@@ -59,6 +59,12 @@ public:
 	UPROPERTY(VisibleInstanceOnly, Category = "AI State")
 	ECustomerPersonality personality = ECustomerPersonality::Standard;
 
+	void SetState(EAIState NewState);
+	UFUNCTION()
+	void OnRep_StateChange();
+	UFUNCTION()
+	void HandleStateEnter(EAIState state);
+	
 	// 대사 데이터 테이블
 	UPROPERTY(EditAnywhere, Category = "AI Dialogue")
 	UDataTable* MenuDialogueTable;
@@ -98,13 +104,6 @@ public:
 	class ATargetPoint* exitTarget;		// 퇴장 위치
 
 public:
-	// == 함수 ==
-	void SetState(EAIState NewState);
-	UFUNCTION()
-	void OnRep_StateChange();
-	UFUNCTION()
-	void HandleStateEnter(EAIState state);
-	
 	// 주문 시작 함수
 	UFUNCTION(Category= "AI Order")
 	void StartOrder();
