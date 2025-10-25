@@ -249,11 +249,13 @@ void UMHGAGameInstance::TravelBackToStartLevel()
 
 	if (bWasHosting)
 	{
-		if (UWorld* World = GetWorld())
-		{
-			const FString TravelURL = FString::Printf(TEXT("/Game/Maps/Start?listen?Nick=%s"), *NickName);
-			World->ServerTravel(TravelURL);
-		}
+		// if (UWorld* World = GetWorld())
+		// {
+		// 	const FString TravelURL = FString::Printf(TEXT("/Game/Maps/Start?listen?Nick=%s"), *NickName);
+		// 	World->ServerTravel(TravelURL);
+		// }
+		const FString TravelOptions = FString::Printf(TEXT("listen?Nick=%s"), *NickName);                                                                                         
+		UGameplayStatics::OpenLevel(this, FName(TEXT("/Game/Maps/Start")), true, TravelOptions);          
 	}
 	else
 	{
