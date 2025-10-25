@@ -87,16 +87,15 @@ void ACustomerAI::UpdateVisuals(int32 meshIdx)
 	{
 		visual = &specialVisual;
 	}
-	else if (regularVisuals.IsValidIndex(mteshIdx))
-                              	{
-                              		visual = &regularVisuals[meshIdx];
-                              	}
-                              
-                              	// VisualsToApply가 유효하고, 그 안의 메쉬와 AnimBP가 모두 설정되었는지 확인
-                              	if (visual && visual->customerMesh && visual->customerAnim)
-                              	{
-                              		GetMesh()->SetSkeletalMesh(visual->customerMesh); // 1. 메쉬 설정
-                              		GetMesh()->SetAnimInsanceClass(visual->customerAnim); // 2. Anim BP 설정
+	else if (regularVisuals.IsValidIndex(meshIdx))
+		{
+			visual = &regularVisuals[meshIdx];
+		}
+	// VisualsToApply가 유효하고, 그 안의 메쉬와 AnimBP가 모두 설정되었는지 확인
+	if (visual && visual->customerMesh && visual->customerAnim)
+	{
+		GetMesh()->SetSkeletalMesh(visual->customerMesh); // 1. 메쉬 설정
+		GetMesh()->SetAnimInstanceClass(visual->customerAnim); // 2. Anim BP 설정
 		GetMesh()->SetRelativeScale3D(visual->RelativeScale);   // 3. ★★★ 스케일 설정 추가 ★★★
 	}
 }
