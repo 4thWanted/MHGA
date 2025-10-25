@@ -23,6 +23,9 @@ public class MHGA : ModuleRules
 			"OnlineSubsystem",
 			"OnlineSubsystemSteam",
 			"OnlineSubsystemUtils",
+			"Voice",
+			"VoiceChat",
+			"AudioMixer",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });

@@ -87,7 +87,7 @@ void ACustomerAI::UpdateVisuals(int32 meshIdx)
 	{
 		visual = &specialVisual;
 	}
-	else if (regularVisuals.IsValidIndex(mteshIdx))
+	else if (regularVisuals.IsValidIndex(meshIdx))
                               	{
                               		visual = &regularVisuals[meshIdx];
                               	}
@@ -96,7 +96,7 @@ void ACustomerAI::UpdateVisuals(int32 meshIdx)
                               	if (visual && visual->customerMesh && visual->customerAnim)
                               	{
                               		GetMesh()->SetSkeletalMesh(visual->customerMesh); // 1. 메쉬 설정
-                              		GetMesh()->SetAnimInsanceClass(visual->customerAnim); // 2. Anim BP 설정
+                              		GetMesh()->SetAnimInstanceClass(visual->customerAnim); // 2. Anim BP 설정
 		GetMesh()->SetRelativeScale3D(visual->RelativeScale);   // 3. ★★★ 스케일 설정 추가 ★★★
 	}
 }
