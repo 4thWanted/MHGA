@@ -11,6 +11,7 @@ class ALobbyBoard;
 class ACounterPOS;
 class UInputMappingContext;
 struct FUniqueNetIdRepl;
+class APlayerState;
 
 UCLASS()
 class MHGA_API AMHGAPlayerController : public APlayerController
@@ -66,10 +67,10 @@ private:
 	void InitializeVoiceChatMonitoring();
 	bool ShouldManageVoiceChat() const;
 	void RefreshRemoteTalkers();
-	void RegisterRemoteTalker(class APlayerState* PlayerState);
+	void RegisterRemoteTalker(APlayerState* TargetPlayerState);
 	void UnregisterRemoteTalker(const FString& PlayerIdKey);
 	void ClearRemoteTalkers();
-	class IOnlineVoicePtr GetVoiceInterface() const;
+	IOnlineVoicePtr GetVoiceInterface() const;
 
 	TMap<FString, FUniqueNetIdRepl> RegisteredRemoteTalkers;
 	FTimerHandle RemoteVoiceRefreshHandle;

@@ -16,7 +16,7 @@
 
 namespace
 {
-	void UpdateRemoteVoiceRegistration(AController* Controller, bool bRegister)
+	void UpdateRemoteVoiceRegistration_Lobby(AController* Controller, bool bRegister)
 	{
 		if (!Controller)
 		{
@@ -80,7 +80,7 @@ FString ALobbyGameMode::InitNewPlayer(APlayerController* NewPlayerController, co
 void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
-	UpdateRemoteVoiceRegistration(NewPlayer, true);
+	UpdateRemoteVoiceRegistration_Lobby(NewPlayer, true);
 
 	PRINTINFO();
 
@@ -97,7 +97,7 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 
 void ALobbyGameMode::Logout(AController* Exiting)
 {
-	UpdateRemoteVoiceRegistration(Exiting, false);
+	UpdateRemoteVoiceRegistration_Lobby(Exiting, false);
 
 	if (ALobbyGameState* LGS = GetGameState<ALobbyGameState>())
 	{

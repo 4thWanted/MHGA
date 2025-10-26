@@ -173,25 +173,31 @@ void AMHGAPlayerController::RefreshRemoteTalkers()
 
 	APlayerState* LocalPlayerState = GetPlayerState<APlayerState>();
 
-	for (APlayerState* PlayerState : GameState->PlayerArray)
+	for (APlayerState* OtherPlayerState : GameState->PlayerArray)
 	{
-		if (!PlayerState || PlayerState == LocalPlayerState)
+		if (!OtherPlayerState || OtherPlayerState == LocalPlayerState)
 		{
 			continue;
 		}
 
-		const FUniqueNetIdRepl& UniqueId = PlayerState->GetUniqueId();
+		const FUniqueNetIdRepl& UniqueId = OtherPlayerState->GetUniqueId();
 		if (!UniqueId.IsValid())
 		{
 			continue;
 		}
 
-		const FString IdKey = UniqueId.ToString();
+		FUniqueNetIdPtr NetId = UniqueId.GetUniqueNetId();
+		if (!NetId.IsValid())
+		{
+			continue;
+		}
+
+		const FString IdKey = NetId->ToString();
 		SeenIds.Add(IdKey);
 
 		if (!RegisteredRemoteTalkers.Contains(IdKey))
 		{
-			RegisterRemoteTalker(PlayerState);
+			RegisterRemoteTalker(OtherPlayerState);
 		}
 	}
 
@@ -210,14 +216,14 @@ void AMHGAPlayerController::RefreshRemoteTalkers()
 	}
 }
 
-void AMHGAPlayerController::RegisterRemoteTalker(APlayerState* PlayerState)
+void AMHGAPlayerController::RegisterRemoteTalker(APlayerState* TargetPlayerState)
 {
-	if (!PlayerState)
+	if (!TargetPlayerState)
 	{
 		return;
 	}
 
-	const FUniqueNetIdRepl& UniqueId = PlayerState->GetUniqueId();
+	const FUniqueNetIdRepl& UniqueId = TargetPlayerState->GetUniqueId();
 	if (!UniqueId.IsValid())
 	{
 		return;
@@ -229,10 +235,11 @@ void AMHGAPlayerController::RegisterRemoteTalker(APlayerState* PlayerState)
 		return;
 	}
 
-	if (const FUniqueNetId* NetId = UniqueId.GetUniqueNetId())
+	if (FUniqueNetIdPtr NetId = UniqueId.GetUniqueNetId())
 	{
+		const FString IdKey = NetId->ToString();
 		VoiceInterface->RegisterRemoteTalker(*NetId);
-		RegisteredRemoteTalkers.Add(UniqueId.ToString(), UniqueId);
+		RegisteredRemoteTalkers.Add(IdKey, UniqueId);
 	}
 }
 
@@ -244,7 +251,7 @@ void AMHGAPlayerController::UnregisterRemoteTalker(const FString& PlayerIdKey)
 	{
 		if (VoiceInterface.IsValid() && Entry->IsValid())
 		{
-			if (const FUniqueNetId* NetId = Entry->GetUniqueNetId())
+			if (FUniqueNetIdPtr NetId = Entry->GetUniqueNetId())
 			{
 				VoiceInterface->UnregisterRemoteTalker(*NetId);
 			}

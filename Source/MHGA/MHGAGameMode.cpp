@@ -12,7 +12,7 @@
 
 namespace
 {
-	void UpdateRemoteVoiceRegistration(AController* Controller, bool bRegister)
+	void UpdateRemoteVoiceRegistration_Game(AController* Controller, bool bRegister)
 	{
 		if (!Controller)
 		{
@@ -86,12 +86,12 @@ void AMHGAGameMode::BeginPlay()
 void AMHGAGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
-	UpdateRemoteVoiceRegistration(NewPlayer, true);
+	UpdateRemoteVoiceRegistration_Game(NewPlayer, true);
 }
 
 void AMHGAGameMode::Logout(AController* Exiting)
 {
-	UpdateRemoteVoiceRegistration(Exiting, false);
+	UpdateRemoteVoiceRegistration_Game(Exiting, false);
 	Super::Logout(Exiting);
 }
 
