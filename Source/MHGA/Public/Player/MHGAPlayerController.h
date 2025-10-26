@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Interfaces/VoiceInterface.h"
 #include "MHGAPlayerController.generated.h"
 
 class ALobbyBoard;
 class ACounterPOS;
 class UInputMappingContext;
+struct FUniqueNetIdRepl;
 
 UCLASS()
 class MHGA_API AMHGAPlayerController : public APlayerController
@@ -27,6 +29,7 @@ protected:
 
 	/** Input mapping context setup */
 	virtual void SetupInputComponent() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	
 	UPROPERTY(EditAnywhere)
@@ -58,4 +61,16 @@ public:
 	void ServerRPC_Ready(int32 PlayerNum);
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_Run();
+
+private:
+	void InitializeVoiceChatMonitoring();
+	bool ShouldManageVoiceChat() const;
+	void RefreshRemoteTalkers();
+	void RegisterRemoteTalker(class APlayerState* PlayerState);
+	void UnregisterRemoteTalker(const FString& PlayerIdKey);
+	void ClearRemoteTalkers();
+	class IOnlineVoicePtr GetVoiceInterface() const;
+
+	TMap<FString, FUniqueNetIdRepl> RegisteredRemoteTalkers;
+	FTimerHandle RemoteVoiceRefreshHandle;
 };
