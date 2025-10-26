@@ -44,6 +44,18 @@ ACustomerAI::ACustomerAI()
 void ACustomerAI::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// ★★★★★★★★★★★★★★★★★★★★★★
+	//          로직 보완 코드
+	// ★★★★★★★★★★★★★★★★★★★★★★
+	// OnRep이 너무 일찍 실행되어 메쉬 설정에 실패했을 경우(위의 방어코드 참조),
+	// BeginPlay에서 한 번 더 메쉬 갱신을 시도합니다.
+	// (서버는 FSM->BeginPlay에서 이미 갱신했지만, 클라이언트에서만 이 코드가 유의미합니다.)
+	if (fsm) // fsm은 생성자에서 생성되므로 BeginPlay 시점에 null이 아닙니다.
+	{
+		// fsm->SelectedMeshIndex는 OnRep이 이미 실행되었다면 올바른 값을 가지고 있습니다.
+		UpdateVisuals(fsm->SelectedMeshIndex);
+	}
 }
 
 // Called every frame
@@ -80,6 +92,17 @@ void ACustomerAI::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 
 void ACustomerAI::UpdateVisuals(int32 meshIdx)
 {
+	// ★★★★★★★★★★★★★★★★★★★★★★
+	//          크래시 방지 코드
+	// ★★★★★★★★★★★★★★★★★★★★★★
+	// OnRep이 BeginPlay보다 빨리 호출되어 Mesh 컴포넌트가 아직 null일 수 있습니다.
+	// 이 경우, 함수를 즉시 종료하여 크래시를 방지합니다.
+	if (GetMesh() == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ACustomerAI::UpdateVisuals: GetMesh()가 null입니다. OnRep이 너무 일찍 호출되었습니다."));
+		return;
+	}
+	
 	// 적용할 비주얼 셋 포인터 (복사 방지)
 	const FCustomerVisuals* visual = nullptr;
 
@@ -184,7 +207,7 @@ class UCustomerUI* ACustomerAI::GetCustomerUIInstance()
 	if (!customerWidget) return nullptr;
 
 	UUserWidget* widgetInst = customerWidget->GetUserWidgetObject();
-	if (widgetInst == nullptr && customerWidget->GetWidgetClass())
+	if (widgetInst == nullptr && customerWidget->GetWidgetClass() && GetWorld())
 	{
 		customerWidget->InitWidget();
 		widgetInst = customerWidget->GetUserWidgetObject();

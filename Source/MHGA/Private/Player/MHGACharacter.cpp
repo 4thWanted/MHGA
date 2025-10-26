@@ -8,8 +8,10 @@
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 #include "MHGA.h"
+#include "MHGAGameMode.h"
 #include "Components/WidgetInteractionComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Player/InteractComponent.h"
 #include "Player/PlayerAnim.h"
 
@@ -62,6 +64,9 @@ AMHGACharacter::AMHGACharacter()
 	ConstructorHelpers::FObjectFinder<UInputAction> crouch(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Crouch.IA_Crouch'"));
 	if (crouch.Succeeded())
 		IA_Crouch = crouch.Object;
+	ConstructorHelpers::FObjectFinder<UInputAction> start(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Start.IA_Start'"));
+	if (crouch.Succeeded())
+		IA_Start = start.Object;
 
 
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -85,6 +90,7 @@ void AMHGACharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(IA_Use, ETriggerEvent::Started, this, &AMHGACharacter::UseInput);
 		EnhancedInputComponent->BindAction(IA_Use, ETriggerEvent::Completed, this, &AMHGACharacter::UseInputRelease);
 		EnhancedInputComponent->BindAction(IA_Crouch, ETriggerEvent::Started, this, &AMHGACharacter::CrouchInput);
+		EnhancedInputComponent->BindAction(IA_Start, ETriggerEvent::Started, this, &AMHGACharacter::StartInput);
 	}
 }
 
@@ -140,5 +146,18 @@ void AMHGACharacter::CrouchInput(const FInputActionValue& Value)
 			Crouch();
 		else
 			UnCrouch();
+	}
+}
+
+void AMHGACharacter::StartInput(const FInputActionValue& Value)
+{
+	if (HasAuthority())
+	{
+		AMHGAGameMode* gm = Cast<AMHGAGameMode>(UGameplayStatics::GetGameMode(this));
+		AMHGAGameState* gs = Cast<AMHGAGameState>(UGameplayStatics::GetGameState(this));
+		if (gm && gs && !gs->bIsGamePlaying)
+		{
+			gm->GameStart();
+		}
 	}
 }

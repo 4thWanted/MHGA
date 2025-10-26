@@ -96,6 +96,11 @@ public:
 	UFUNCTION()
 	void CallNextCustomerFromWandering();
 
+	// [서버] 게임모드에 의해 호출되어 손님 스폰 타이머 설정하는 함수
+	void StartSpawnCustomer();
+
+	void KickAllCustomers();
+	
 	// 테스트용 임시변수
 public:
 	UPROPERTY(EditAnywhere, Category = "Spawn")

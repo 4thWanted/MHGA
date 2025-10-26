@@ -154,14 +154,14 @@ void UCustomerFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 	{
 		me->Destroy();
 	}
-	
 }
-
-
 
 void UCustomerFSM::OnRep_MeshIndex()
 {
-	me->UpdateVisuals(SelectedMeshIndex);
+	if (IsValid(me)) // <- 이 코드가 Stale Pointer를 안전하게 걸러냅니다.
+	{
+		me->UpdateVisuals(SelectedMeshIndex);
+	}
 }
 
 
@@ -189,15 +189,15 @@ void UCustomerFSM::SetState(EAIState NewState)
 void UCustomerFSM::OnRep_StateChange()
 {
 	// 클라이언트에서만 실행
-	if (GetOwner()->HasAuthority()) return;
-
-	if (me)
-	{
-		if (curState == EAIState::Ordering)
-		{
-			me->ShowCustomerDialogue();
-		}
-	}
+	// if (GetOwner()->HasAuthority()) return;
+	//
+	// if (me)
+	// {
+	// 	if (curState == EAIState::Ordering)
+	// 	{
+	// 		me->ShowCustomerDialogue();
+	// 	}
+	// }
 
 }
 

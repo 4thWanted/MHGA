@@ -8,9 +8,12 @@
 #include "MHGACameraManager.h"
 #include "MHGAGameState.h"
 #include "Counter/CounterPOS.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Lobby/LobbyBoard.h"
 #include "Lobby/LobbyGameMode.h"
 #include "Lobby/LobbyGameState.h"
+#include "Player/MHGACharacter.h"
 
 AMHGAPlayerController::AMHGAPlayerController()
 {
@@ -88,4 +91,21 @@ void AMHGAPlayerController::ServerRPC_Ready_Implementation(int32 PlayerNum)
 void AMHGAPlayerController::ServerRPC_Run_Implementation()
 {
 	LobbyBoard->MulticastRPC_Run();
+}
+
+
+void AMHGAPlayerController::Client_HandleGameOver()
+{
+	UE_LOG(LogTemp, Warning, TEXT("PlayerController: Client_HandleGameOver 실행."));
+
+	ACharacter* MyCharacter = GetCharacter();
+	if (MyCharacter)
+	{
+		// 이동 컴포넌트 정지
+		MyCharacter->GetCharacterMovement()->StopMovementImmediately();
+		MyCharacter->GetCharacterMovement()->DisableMovement();
+        
+		// 입력 비활성화
+		MyCharacter->DisableInput(this);
+	}
 }

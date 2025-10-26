@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameOverWidget.h"
 #include "GameFramework/PlayerController.h"
 #include "MHGAPlayerController.generated.h"
 
@@ -58,4 +59,7 @@ public:
 	void ServerRPC_Ready(int32 PlayerNum);
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_Run();
+
+	// GameOver
+	void Client_HandleGameOver();
 };
