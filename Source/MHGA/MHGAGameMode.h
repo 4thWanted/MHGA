@@ -16,6 +16,8 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual void Logout(AController* Exiting) override;
 
 	// 평점 관리
 	void ReportScoreChanged(EScoreChangeReason reason, int32 changeScore);

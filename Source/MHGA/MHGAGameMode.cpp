@@ -5,6 +5,60 @@
 #include "MHGAGameState.h"
 #include "Player/MHGACharacter.h"
 #include "Player/MHGAPlayerController.h"
+#include "GameFramework/PlayerState.h"
+#include "OnlineSubsystem.h"
+#include "OnlineSubsystemUtils.h"
+#include "Interfaces/VoiceInterface.h"
+
+namespace
+{
+	void UpdateRemoteVoiceRegistration(AController* Controller, bool bRegister)
+	{
+		if (!Controller)
+		{
+			return;
+		}
+
+		UWorld* World = Controller->GetWorld();
+		if (!World)
+		{
+			return;
+		}
+
+		IOnlineSubsystem* Subsystem = Online::GetSubsystem(World);
+		if (!Subsystem)
+		{
+			return;
+		}
+
+		IOnlineVoicePtr VoiceInterface = Subsystem->GetVoiceInterface();
+		if (!VoiceInterface.IsValid())
+		{
+			return;
+		}
+
+		APlayerState* PlayerState = Controller->PlayerState;
+		if (!PlayerState)
+		{
+			return;
+		}
+
+		const FUniqueNetIdRepl& UniqueId = PlayerState->GetUniqueId();
+		if (!UniqueId.IsValid())
+		{
+			return;
+		}
+
+		if (bRegister)
+		{
+			VoiceInterface->RegisterRemoteTalker(*UniqueId.GetUniqueNetId());
+		}
+		else
+		{
+			VoiceInterface->UnregisterRemoteTalker(*UniqueId.GetUniqueNetId());
+		}
+	}
+}
 
 AMHGAGameMode::AMHGAGameMode()
 {
@@ -27,6 +81,18 @@ void AMHGAGameMode::BeginPlay()
 		gs->remainTime = gs->startTime;
 		UE_LOG(LogTemp, Warning, TEXT("서버 : 영업 시작, 제한시간 : %.1f초"), gs->remainTime);
 	}
+}
+
+void AMHGAGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+	UpdateRemoteVoiceRegistration(NewPlayer, true);
+}
+
+void AMHGAGameMode::Logout(AController* Exiting)
+{
+	UpdateRemoteVoiceRegistration(Exiting, false);
+	Super::Logout(Exiting);
 }
 
 void AMHGAGameMode::Tick(float DeltaTime)

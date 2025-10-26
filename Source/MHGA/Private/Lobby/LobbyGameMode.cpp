@@ -10,6 +10,59 @@
 #include "Kismet/GameplayStatics.h"
 #include "Lobby/LobbyBoard.h"
 #include "Lobby/LobbyGameState.h"
+#include "OnlineSubsystem.h"
+#include "OnlineSubsystemUtils.h"
+#include "Interfaces/VoiceInterface.h"
+
+namespace
+{
+	void UpdateRemoteVoiceRegistration(AController* Controller, bool bRegister)
+	{
+		if (!Controller)
+		{
+			return;
+		}
+
+		UWorld* World = Controller->GetWorld();
+		if (!World)
+		{
+			return;
+		}
+
+		IOnlineSubsystem* Subsystem = Online::GetSubsystem(World);
+		if (!Subsystem)
+		{
+			return;
+		}
+
+		IOnlineVoicePtr VoiceInterface = Subsystem->GetVoiceInterface();
+		if (!VoiceInterface.IsValid())
+		{
+			return;
+		}
+
+		APlayerState* PlayerState = Controller->PlayerState;
+		if (!PlayerState)
+		{
+			return;
+		}
+
+		const FUniqueNetIdRepl& UniqueId = PlayerState->GetUniqueId();
+		if (!UniqueId.IsValid())
+		{
+			return;
+		}
+
+		if (bRegister)
+		{
+			VoiceInterface->RegisterRemoteTalker(*UniqueId.GetUniqueNetId());
+		}
+		else
+		{
+			VoiceInterface->UnregisterRemoteTalker(*UniqueId.GetUniqueNetId());
+		}
+	}
+}
 
 FString ALobbyGameMode::InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId,
 	const FString& Options, const FString& Portal)
@@ -27,6 +80,7 @@ FString ALobbyGameMode::InitNewPlayer(APlayerController* NewPlayerController, co
 void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
+	UpdateRemoteVoiceRegistration(NewPlayer, true);
 
 	PRINTINFO();
 
@@ -43,6 +97,8 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 
 void ALobbyGameMode::Logout(AController* Exiting)
 {
+	UpdateRemoteVoiceRegistration(Exiting, false);
+
 	if (ALobbyGameState* LGS = GetGameState<ALobbyGameState>())
 	{
 		if (APlayerState* PS = Exiting ? Exiting->PlayerState : nullptr)

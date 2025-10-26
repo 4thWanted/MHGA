@@ -9,24 +9,45 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
 #include "Online/OnlineSessionNames.h"
+#include "Misc/PackageName.h"
+#include "Engine/World.h"
 
 void UMHGAGameInstance::Init()
 {
 	Super::Init();
 
-	IOnlineSubsystem* subsys = Online::GetSubsystem(GetWorld());
-	if (subsys)
+	PostLoadMapHandle = FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &UMHGAGameInstance::HandlePostLoadMap);
+
+	if (UWorld* World = GetWorld())
 	{
-		SessionInterface = subsys->GetSessionInterface();
-		if (SessionInterface.IsValid())
+		if (IOnlineSubsystem* Subsystem = Online::GetSubsystem(World))
 		{
-			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UMHGAGameInstance::OnCreateSessionComplete);
-			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UMHGAGameInstance::OnFindSessionComplete);
-			SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UMHGAGameInstance::OnJoinSessionComplete);
-			SessionInterface->OnEndSessionCompleteDelegates.AddUObject(this, &UMHGAGameInstance::OnEndSessionComplete);
-			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UMHGAGameInstance::OnDestroySessionComplete);
+			SessionInterface = Subsystem->GetSessionInterface();
+			if (SessionInterface.IsValid())
+			{
+				SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UMHGAGameInstance::OnCreateSessionComplete);
+				SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UMHGAGameInstance::OnFindSessionComplete);
+				SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UMHGAGameInstance::OnJoinSessionComplete);
+				SessionInterface->OnEndSessionCompleteDelegates.AddUObject(this, &UMHGAGameInstance::OnEndSessionComplete);
+				SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UMHGAGameInstance::OnDestroySessionComplete);
+			}
 		}
+
+		UpdateVoiceChatForWorld(World);
 	}
+}
+
+void UMHGAGameInstance::Shutdown()
+{
+	if (PostLoadMapHandle.IsValid())
+	{
+		FCoreUObjectDelegates::PostLoadMapWithWorld.Remove(PostLoadMapHandle);
+		PostLoadMapHandle = FDelegateHandle();
+	}
+
+	StopVoiceChat();
+
+	Super::Shutdown();
 }
 
 void UMHGAGameInstance::CreateMySession(FString displayName, int32 playerCount)
@@ -264,6 +285,133 @@ void UMHGAGameInstance::TravelBackToStartLevel()
 			const FString TravelURL = FString::Printf(TEXT("/Game/Maps/Start?Nick=%s"), *NickName);
 			PlayerController->ClientTravel(TravelURL, TRAVEL_Absolute);
 		}
+	}
+}
+
+void UMHGAGameInstance::HandlePostLoadMap(UWorld* LoadedWorld)
+{
+	if (!LoadedWorld || !LoadedWorld->IsGameWorld())
+	{
+		return;
+	}
+
+	UpdateVoiceChatForWorld(LoadedWorld);
+}
+
+void UMHGAGameInstance::UpdateVoiceChatForWorld(UWorld* LoadedWorld)
+{
+	if (!bVoiceChatDesired)
+	{
+		StopVoiceChat();
+		return;
+	}
+
+	if (ShouldEnableVoiceChatForWorld(LoadedWorld))
+	{
+		StartVoiceChat(LoadedWorld);
+	}
+	else
+	{
+		StopVoiceChat();
+	}
+}
+
+bool UMHGAGameInstance::ShouldEnableVoiceChatForWorld(const UWorld* LoadedWorld) const
+{
+	if (!LoadedWorld || !LoadedWorld->IsGameWorld())
+	{
+		return false;
+	}
+
+	const FString ShortName = FPackageName::GetShortName(LoadedWorld->GetMapName());
+	return ShortName.Contains(TEXT("Lobby")) || ShortName.Contains(TEXT("Main"));
+}
+
+bool UMHGAGameInstance::InitializeVoiceInterface(UWorld* ForWorld)
+{
+	if (VoiceInterface.IsValid())
+	{
+		return true;
+	}
+
+	if (!ForWorld)
+	{
+		ForWorld = GetWorld();
+	}
+
+	if (!ForWorld)
+	{
+		return false;
+	}
+
+	if (IOnlineSubsystem* Subsystem = Online::GetSubsystem(ForWorld))
+	{
+		VoiceInterface = Subsystem->GetVoiceInterface();
+	}
+
+	return VoiceInterface.IsValid();
+}
+
+void UMHGAGameInstance::StartVoiceChat(UWorld* ForWorld)
+{
+	if (bVoiceChatActive)
+	{
+		return;
+	}
+
+	if (!ForWorld)
+	{
+		ForWorld = GetWorld();
+	}
+
+	if (!ForWorld || ForWorld->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (!InitializeVoiceInterface(ForWorld))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Voice interface unavailable. Voice chat disabled."));
+		return;
+	}
+
+	const uint32 LocalUserNum = static_cast<uint32>(LocalVoiceUserNum);
+	VoiceInterface->RegisterLocalTalker(LocalUserNum);
+	VoiceInterface->StartNetworkedVoice(LocalUserNum);
+	UE_LOG(LogTemp, Log, TEXT("Voice chat enabled for %s"), *FPackageName::GetShortName(ForWorld->GetMapName()));
+	
+	bVoiceChatActive = true;
+}
+
+void UMHGAGameInstance::StopVoiceChat()
+{
+	if (!VoiceInterface.IsValid())
+	{
+		bVoiceChatActive = false;
+		return;
+	}
+
+	const uint32 LocalUserNum = static_cast<uint32>(LocalVoiceUserNum);
+	VoiceInterface->StopNetworkedVoice(LocalUserNum);
+	VoiceInterface->UnregisterLocalTalker(LocalUserNum);
+	bVoiceChatActive = false;
+	VoiceInterface.Reset();
+}
+
+void UMHGAGameInstance::SetVoiceChatEnabled(bool bEnable)
+{
+	bVoiceChatDesired = bEnable;
+
+	if (bEnable)
+	{
+		if (UWorld* World = GetWorld())
+		{
+			UpdateVoiceChatForWorld(World);
+		}
+	}
+	else
+	{
+		StopVoiceChat();
 	}
 }
 
