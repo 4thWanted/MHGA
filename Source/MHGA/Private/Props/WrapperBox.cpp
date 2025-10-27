@@ -8,29 +8,21 @@
 
 AWrapperBox::AWrapperBox()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(GetRootComponent());
-}
+	Mesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 
-void AWrapperBox::BeginPlay()
-{
-	Super::BeginPlay();
+	WrapperPoint = CreateDefaultSubobject<USceneComponent>(TEXT("Point"));
+	WrapperPoint->SetupAttachment(Mesh);
 
-	WrapperPoint = Cast<ATargetPoint>(UGameplayStatics::GetActorOfClass(GetWorld(), ATargetPoint::StaticClass()));
-	if (WrapperPoint == nullptr)
-		UE_LOG(LogTemp, Error, TEXT("FUCK"))
-}
-
-void AWrapperBox::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
+	bReplicates = true;
 }
 
 void AWrapperBox::SpawnWrapper()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Spawn Wrapper"))
-	GetWorld()->SpawnActor<AWrappingPaper>(WrapperClass, WrapperPoint->GetActorLocation(), FRotator(0));
+	GetWorld()->SpawnActor<AWrappingPaper>(WrapperClass, WrapperPoint->GetComponentLocation(), FRotator(0));
 }
 

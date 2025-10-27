@@ -13,19 +13,7 @@ class MHGA_API AWrapperBox : public AActor
 public:
 	AWrapperBox();
 
-	virtual void Tick(float DeltaTime) override;
-
 	void SpawnWrapper();
-
-	
-protected:
-	virtual void BeginPlay() override;
-
-
-private:
-
-
-	
 /* Field */
 public:
 	UPROPERTY(VisibleAnywhere)
@@ -35,16 +23,5 @@ public:
 	TSubclassOf<class AWrappingPaper> WrapperClass;
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<class AWrappingPaper> Wrapper;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<class ATargetPoint> WrapperPoint;
-
-	
-private:
-
-
-
-	
-	
+	TObjectPtr<USceneComponent> WrapperPoint;
 };
