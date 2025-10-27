@@ -30,4 +30,5 @@ public:
 	virtual void OnUse() override;
 	virtual void SetLocation(FVector Loc) override;
 	virtual UStaticMeshComponent* GetMeshComp() override	{ return Mesh;}
+	virtual bool IsTool() override { return true; }
 };

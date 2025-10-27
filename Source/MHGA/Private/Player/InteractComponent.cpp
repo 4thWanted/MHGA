@@ -35,6 +35,8 @@ void UInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	/* dove */
 	if (bIsGrabbed && GrabbedProp)
 	{
+		if (GrabbedProp->IsTool()) return;
+		
 		FHitResult hitresult;
 		FVector start = Owner->GetFirstPersonCameraComponent()->GetComponentLocation();
 		FVector end = start + Owner->GetFirstPersonCameraComponent()->GetForwardVector() * HoldDistance;

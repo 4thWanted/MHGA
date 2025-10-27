@@ -19,7 +19,8 @@ public:
 	void OnUse() override	{}
 	virtual void SetLocation(FVector Loc) override;
 	virtual UStaticMeshComponent* GetMeshComp() override	{ return Mesh;}
-
+	virtual bool IsTool() override { return false; }
+	
 	UFUNCTION(Server, Reliable)
 	void ServerSetName(const FString& Name);
 	
