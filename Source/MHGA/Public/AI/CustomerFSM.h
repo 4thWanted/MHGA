@@ -103,11 +103,11 @@ public:
 	int32 orderQuantity = 1;
 	// 주문 대기 시간
 	UPROPERTY(VisibleInstanceOnly, Category = "AI Order")
-	float maxOrderTime = 10.f;
+	float maxOrderTime = 30.f;
 	float orderTimer = 0.f;
 	// 음식 대기 시간
 	UPROPERTY(EditAnywhere, Category = "AI Order")
-	float maxWaitTime = 30.f;
+	float maxWaitTime = 60.f;
 	float waitingTimer = 0.f;
 
 	// == 위치정보 ==
