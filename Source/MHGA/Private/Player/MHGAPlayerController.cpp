@@ -10,14 +10,16 @@
 #include "GameFramework/PlayerState.h"
 #include "InputMappingContext.h"
 #include "Lobby/LobbyBoard.h"
-#include "Lobby/LobbyGameMode.h"
 #include "Lobby/LobbyGameState.h"
 #include "MHGACameraManager.h"
-#include "MHGAGameState.h"
 #include "Misc/PackageName.h"
 #include "OnlineSubsystem.h"
 #include "OnlineSubsystemUtils.h"
 #include "TimerManager.h"
+#include "MHGAGameState.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Player/MHGACharacter.h"
 
 AMHGAPlayerController::AMHGAPlayerController()
 {
@@ -286,4 +288,20 @@ IOnlineVoicePtr AMHGAPlayerController::GetVoiceInterface() const
 	}
 
 	return nullptr;
+}
+
+void AMHGAPlayerController::Client_HandleGameOver()
+{
+	UE_LOG(LogTemp, Warning, TEXT("PlayerController: Client_HandleGameOver 실행."));
+
+	ACharacter* MyCharacter = GetCharacter();
+	if (MyCharacter)
+	{
+		// 이동 컴포넌트 정지
+		MyCharacter->GetCharacterMovement()->StopMovementImmediately();
+		MyCharacter->GetCharacterMovement()->DisableMovement();
+        
+		// 입력 비활성화
+		MyCharacter->DisableInput(this);
+	}
 }

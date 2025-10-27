@@ -64,7 +64,7 @@ public:
 	
 	/** 특별 손님이 등장할 확률 (0.0 ~ 1.0 사이 값) */
 	UPROPERTY(EditDefaultsOnly, Category = "AI State", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float SpecialCustomerChance = 0.05f; // 기본값 5%
+	float SpecialCustomerChance = 0.1f; // 기본값 5%
 	/**
 	 * 선택된 메쉬 인덱스. -1 = 특별 손님, 0+ = 일반 손님 메쉬 배열 인덱스
 	 * 클라이언트는 이 값을 복제받아 AI(몸)의 메쉬를 갱신합니다.
@@ -103,11 +103,11 @@ public:
 	int32 orderQuantity = 1;
 	// 주문 대기 시간
 	UPROPERTY(VisibleInstanceOnly, Category = "AI Order")
-	float maxOrderTime = 10.f;
+	float maxOrderTime = 30.f;
 	float orderTimer = 0.f;
 	// 음식 대기 시간
 	UPROPERTY(EditAnywhere, Category = "AI Order")
-	float maxWaitTime = 30.f;
+	float maxWaitTime = 60.f;
 	float waitingTimer = 0.f;
 
 	// == 위치정보 ==

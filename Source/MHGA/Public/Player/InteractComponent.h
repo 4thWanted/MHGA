@@ -37,16 +37,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Grab")
 	float HoldDistance = 150.f; // 손에서 떨어진 거리
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Grab")
-	float GrabRadius = 20.f; // 구체 트레이스 반경
+	float GrabRadius = 10.f; // 구체 트레이스 반경
 
 	/* dove */
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UStaticMeshComponent> m_preview_mesh;
+	// UPROPERTY(VisibleAnywhere)
+	// TObjectPtr<UStaticMeshComponent> m_preview_mesh;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Grab")
 	bool bIsGrabbed = false;
 	IGrabableProps* GrabbedProp;
+	UPROPERTY()
+	AActor* GrabbedActor;
 
 protected:
 	void GrabProps();

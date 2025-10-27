@@ -27,4 +27,9 @@ public:
 	virtual void OnUse() = 0;
 	UFUNCTION(Category="GrabComp")
 	virtual void SetLocation(FVector Loc) = 0;
+	UFUNCTION(Category="GrabComp")
+	virtual bool IsTool() = 0;
+
+	UFUNCTION(Category="GrabComp")
+	virtual UStaticMeshComponent* GetMeshComp() = 0;
 };

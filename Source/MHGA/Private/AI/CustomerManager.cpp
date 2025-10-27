@@ -2,9 +2,12 @@
 
 
 #include "AI/CustomerManager.h"
+
+#include "MHGAGameState.h"
 #include "Counter/PickupZone.h" // 여기에 include 추가
 #include "AI/CustomerAI.h"
 #include "AI/CustomerFSM.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -21,10 +24,6 @@ void ACustomerManager::BeginPlay()
 	Super::BeginPlay();
 	if (HasAuthority())
 	{
-		// 스폰 시간 랜덤으로 지정
-		float spawnTime = FMath::RandRange(minTime, maxTime);
-		// 스폰 타이머 설정
-		GetWorld()->GetTimerManager().SetTimer(spawnTimer, this, &ACustomerManager::SpawnCustomer, spawnTime);
 		// 게임 시작시 손님 대기칸 초기화
 		waitingCustomers.Init(nullptr, waitingPoints.Num());
 	}
@@ -49,7 +48,17 @@ void ACustomerManager::Tick(float DeltaTime)
 
 void ACustomerManager::SpawnCustomer()
 {
+	AMHGAGameState* gs = GetWorld()->GetGameState<AMHGAGameState>();
+	
 	if (!HasAuthority()) return;
+
+	if (!gs) // <- 이 함수는 직접 구현해야 합니다.
+	{
+		// 게임이 아직 시작 안 됨. 타이머를 다시 설정하여 나중에 확인합니다.
+		float checkAgainTime = FMath::RandRange(minTime, maxTime);
+		GetWorld()->GetTimerManager().SetTimer(spawnTimer, this, &ACustomerManager::SpawnCustomer, checkAgainTime);
+		return; // 스폰하지 않고 종료
+	}
 	
 	// 현재 인원수가 최대 인원수보다 적은지 확인
 	if (CurrentSpawnedCustomers >= MaxSpawnedCustomers)
@@ -98,22 +107,6 @@ ATargetPoint* ACustomerManager::RequestWaitingPoint(ACustomerAI* customer)
 ATargetPoint* ACustomerManager::RequestPickupPoint()
 {
 	return pickupPoints[0];
-	// // 대기열에 빈 자리가 있는지 확인
-	// int32 emptySpotIdx = waitingCustomers.Find(nullptr);
-	//
-	// // 빈자리가 있고, 대기열이 비어있을 때만 신규 손님을 들여보낸다
-	// if (emptySpotIdx != INDEX_NONE && wanderingCustomers.Num() == 0)
-	// {
-	// 	UE_LOG(LogTemp, Log, TEXT("줄도 비어있고 대기자도 없어서 새 손님을 %d번 자리에 배정합니다"), emptySpotIdx);
-	// 	waitingCustomers[emptySpotIdx] = customer;
-	// 	return waitingPoints[emptySpotIdx];
-	// }
-	// else
-	// {
-	// 	// 빈자리가 없거나, 빈자리가 있어도 먼저 온 대기자가 있다면 신규 손님을 대기자 명단에 추가하고 배회시킨다
-	// 	wanderingCustomers.Add(customer);
-	// 	return nullptr;
-	// }
 }
 
 ATargetPoint* ACustomerManager::RequestExitPoint()
@@ -195,6 +188,51 @@ void ACustomerManager::CallNextCustomerFromWandering()
 			}
 		}
 	}
+}
+
+void ACustomerManager::StartSpawnCustomer()
+{
+	if (!HasAuthority()) return;
+	
+	// 스폰 시간 랜덤으로 지정
+	float spawnTime = FMath::RandRange(minTime, maxTime);
+	GetWorld()->GetTimerManager().SetTimer(spawnTimer, this, &ACustomerManager::SpawnCustomer, spawnTime);
+
+	UE_LOG(LogTemp, Log, TEXT("영업 시작!"));
+}
+
+void ACustomerManager::KickAllCustomers()
+{
+	if (!HasAuthority()) return;
+
+	UE_LOG(LogTemp, Error, TEXT("CustomerManager : 영업 종료. 모든 손님 퇴장시키가"));
+
+	// 2. 더 이상 손님이 스폰되지 않도록 스폰 타이머를 중지합니다.
+	GetWorld()->GetTimerManager().ClearTimer(spawnTimer);
+	bRespawn = false; // (SpawnCustomer 함수가 타이머를 재설정하지 못하게 막음)
+
+	// 3. 월드에 존재하는 모든 ACustomerAI 액터를 찾습니다.
+	TArray<AActor*> FoundCustomers;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACustomerAI::StaticClass(), FoundCustomers);
+
+	// 4. 모든 손님을 순회하며 Exit 상태로 만듭니다.
+	for (AActor* CustomerActor : FoundCustomers)
+	{
+		ACustomerAI* Customer = Cast<ACustomerAI>(CustomerActor);
+		if (Customer && IsValid(Customer->fsm))
+		{
+			// 손님의 상태가 이미 Exit가 아닐 때만 설정 (중복 방지)
+			if (Customer->fsm->curState != EAIState::Exit)
+			{
+				Customer->fsm->SetState(EAIState::Exit);
+			}
+		}
+	}
+
+	// 5. (선택) 관리 목록도 비웁니다.
+	waitingCustomers.Empty();
+	wanderingCustomers.Empty();
+	CurrentSpawnedCustomers = 0;
 }
 
 void ACustomerManager::OnCustomerExited()

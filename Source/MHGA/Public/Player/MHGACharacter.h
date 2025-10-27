@@ -42,6 +42,8 @@ protected:
 	UInputAction* IA_Use;
 	UPROPERTY(EditAnywhere, Category ="Input")
 	UInputAction* IA_Crouch;
+	UPROPERTY(EditAnywhere, Category ="Input")
+	UInputAction* IA_Start;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Components")
 	UCameraComponent* FPSCamComponent;
@@ -59,6 +61,7 @@ protected:
 	void UseInput(const FInputActionValue& Value);
 	void UseInputRelease(const FInputActionValue& Value);
 	void CrouchInput(const FInputActionValue& Value);
+	void StartInput(const FInputActionValue& Value);
 
 public:
 	USkeletalMeshComponent* GetFirstPersonMesh() const { return GetMesh(); }

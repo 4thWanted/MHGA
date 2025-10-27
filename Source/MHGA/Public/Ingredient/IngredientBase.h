@@ -23,6 +23,7 @@ public:
 	virtual void OnUse() override;
 	virtual void SetLocation(FVector Loc) override;
 	EIngredient GetIngType() { return IngType; }
+	virtual bool IsTool() override { return false; }
 
 	UStaticMeshComponent* GetMeshComp() {return Mesh;}
 protected:

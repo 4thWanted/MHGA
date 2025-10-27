@@ -53,4 +53,6 @@ public:
 	virtual void OnPut() override {}
 	virtual void OnUse() override{}
 	virtual void SetLocation(FVector Loc) override;
+	virtual UStaticMeshComponent* GetMeshComp() override	{ return PaperMesh;}
+	virtual bool IsTool() override { return false; }
 };

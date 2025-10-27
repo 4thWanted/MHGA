@@ -32,5 +32,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Game Config")
 	int32 bonusCorrectFood = 10;
 
+	void GameStart();
 	void HandleGameOver(FString reason);
 };

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameOverWidget.h"
 #include "GameFramework/PlayerController.h"
 #include "Interfaces/VoiceInterface.h"
 #include "MHGAPlayerController.generated.h"
@@ -74,4 +75,7 @@ private:
 
 	TMap<FString, FUniqueNetIdRepl> RegisteredRemoteTalkers;
 	FTimerHandle RemoteVoiceRefreshHandle;
+	
+	// GameOver
+	void Client_HandleGameOver();
 };

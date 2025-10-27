@@ -3,6 +3,8 @@
 #include "MHGAGameMode.h"
 
 #include "MHGAGameState.h"
+#include "AI/CustomerManager.h"
+#include "Kismet/GameplayStatics.h"
 #include "Player/MHGACharacter.h"
 #include "Player/MHGAPlayerController.h"
 #include "GameFramework/PlayerState.h"
@@ -79,8 +81,11 @@ void AMHGAGameMode::BeginPlay()
 	if (gs)
 	{
 		gs->remainTime = gs->startTime;
-		UE_LOG(LogTemp, Warning, TEXT("서버 : 영업 시작, 제한시간 : %.1f초"), gs->remainTime);
+		gs->bIsGamePlaying = false;
+		
+		UE_LOG(LogTemp, Warning, TEXT("준비 완료, 대기중"));
 	}
+	
 }
 
 void AMHGAGameMode::PostLogin(APlayerController* NewPlayer)
@@ -103,7 +108,8 @@ void AMHGAGameMode::Tick(float DeltaTime)
 	if (!HasAuthority()) return;
 	
 	AMHGAGameState* gs = GetGameState<AMHGAGameState>();
-	if (!gs || gs->bIsGameOver) return;
+	// gamestate가 없거나, 게임오버 상태거나, 게임이 아직 시작 안됐으면 함수 나가기
+	if (!gs || gs->bIsGameOver || !gs->bIsGamePlaying) return;
 
 	// 시간 업데이트
 	gs->remainTime -= DeltaTime;
@@ -179,6 +185,24 @@ void AMHGAGameMode::ReportScoreChanged(EScoreChangeReason reason, int32 changeSc
 	}
 }
 
+void AMHGAGameMode::GameStart()
+{
+	AMHGAGameState* gs = GetGameState<AMHGAGameState>();
+	ACustomerManager* customerManager = Cast<ACustomerManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ACustomerManager::StaticClass()));
+	if (gs && customerManager)
+	{
+		gs->bIsGamePlaying = true;
+		gs->OnRep_GameStart();
+		gs->remainTime = gs->startTime;
+		UE_LOG(LogTemp, Warning, TEXT("서버 : 영업 시작, 제한시간 : %.1f초"), gs->remainTime);
+		customerManager->StartSpawnCustomer();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameMode: 월드에서 CustomerManager를 찾을 수 없습니다!"));
+	}
+}
+
 void AMHGAGameMode::HandleGameOver(FString reason)
 {
 	AMHGAGameState* gs = GetGameState<AMHGAGameState>();
@@ -186,6 +210,16 @@ void AMHGAGameMode::HandleGameOver(FString reason)
 	{
 		gs->bIsGameOver = true;
 		UE_LOG(LogTemp, Error, TEXT("서버 : 영업 종료! 사유 : %s"), *reason);
+
+		ACustomerManager* CustomerManager = Cast<ACustomerManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ACustomerManager::StaticClass()));
+       
+		// 모든 손님을 퇴장시키라고 명령.
+		if (CustomerManager)
+		{
+			CustomerManager->KickAllCustomers();
+		}
 		// TODO : 게임 종료 처리(플레이어 입력 중지, 결과화면 표시)
+		gs->OnRep_GameOver();
+		
 	}
 }
