@@ -126,6 +126,7 @@ void AMHGAGameMode::GameStart()
 	if (gs && customerManager)
 	{
 		gs->bIsGamePlaying = true;
+		gs->OnRep_GameStart();
 		gs->remainTime = gs->startTime;
 		UE_LOG(LogTemp, Warning, TEXT("서버 : 영업 시작, 제한시간 : %.1f초"), gs->remainTime);
 		customerManager->StartSpawnCustomer();
