@@ -4,7 +4,7 @@
 
 APatty::APatty()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
 	// 종합 상태 초기화
 	IngType = EIngredient::RawPatty;
@@ -18,18 +18,12 @@ APatty::APatty()
 
 	// 기타 변수 초기화
 	bIsFrontSideDown = true; // 기본값 : 앞면이 아래
+	bIsCooking = false;
 }
 
 void APatty::BeginPlay()
 {
 	Super::BeginPlay();
-
-	
-}
-
-void APatty::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 
 void APatty::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -37,6 +31,12 @@ void APatty::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLife
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(APatty, CookState);
+	DOREPLIFETIME(APatty, bIsFrontCooked);
+	DOREPLIFETIME(APatty, bIsBackCooked);
+	DOREPLIFETIME(APatty, bIsFrontOverCooked);
+	DOREPLIFETIME(APatty, bIsBackOverCooked);
+	DOREPLIFETIME(APatty, bIsFrontSideDown);
+	DOREPLIFETIME(APatty, bIsCooking);
 }
 
 EPattyCookState APatty::GetCookState() const
@@ -44,34 +44,62 @@ EPattyCookState APatty::GetCookState() const
 	return CookState;
 }
 
-void APatty::ServerSetCookState_Implementation(const EPattyCookState NewState)
+void APatty::StartCook()
 {
-	CookState = NewState;
 	
-	if ( CookState == EPattyCookState::Cooked )
-		IngType = EIngredient::WellDonePatty;
-	
-	if ( CookState == EPattyCookState::Overcooked )
-		IngType = EIngredient::OvercookedPatty;
-
-	OnRep_CookState();
 }
 
-void APatty::SetCookState(const EPattyCookState NewState)
+void APatty::ShutdownCook()
 {
-	if (HasAuthority())
-	{
-		ServerSetCookState_Implementation(NewState);
-	}
-	else
-	{
-		ServerSetCookState(NewState);
-	}
 }
 
-void APatty::OnRep_CookState()
+void APatty::OnRep_CookStateChanged()
 {
-	UpdateMaterial();
+}
+
+
+void APatty::StartCooking()
+{
+}
+
+void APatty::StopCooking()
+{
+}
+
+void APatty::Flip()
+{
+}
+
+void APatty::Server_StartCooking_Implementation()
+{
+}
+
+void APatty::Server_StopCooking_Implementation()
+{
+}
+
+void APatty::Server_Flip_Implementation()
+{
+}
+
+void APatty::StartCookTimer()
+{
+}
+
+void APatty::StopAllTimer()
+{
+}
+
+void APatty::CookCurrentSide()
+{
+}
+
+void APatty::OverCookCurrentSide()
+{
+}
+
+void APatty::UpdateCookState()
+{
 }
 
 void APatty::UpdateMaterial()
@@ -109,8 +137,3 @@ void APatty::UpdateMaterial()
 		pMesh->SetMaterial(0, DynamicMaterial);
 	}
 }
-
-//	TODO : 조리시작
-
-
-//	TODO : 조리중지

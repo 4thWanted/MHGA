@@ -23,9 +23,8 @@ public:
 	APatty();
 	
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
+	
 	// 패티 상태 변경시 호출되는 함수
 	UFUNCTION()
 	void OnRep_CookStateChanged();
@@ -68,6 +67,9 @@ public:
 	TObjectPtr<UMaterialInstanceDynamic> backMaterial;
 
 	// CookingArea 호출 함수
+	virtual void StartCook() override;
+	virtual void ShutdownCook() override;
+
 	void StartCooking();
 	void StopCooking();
 	// 뒤집게 함수
