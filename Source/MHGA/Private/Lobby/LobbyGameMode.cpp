@@ -11,8 +11,13 @@
 #include "Lobby/LobbyBoard.h"
 #include "Lobby/LobbyGameState.h"
 
+ALobbyGameMode::ALobbyGameMode()
+{
+	bUseSeamlessTravel = true;
+}
+
 FString ALobbyGameMode::InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId,
-	const FString& Options, const FString& Portal)
+                                      const FString& Options, const FString& Portal)
 {
 	FString Result = Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);
 

@@ -14,6 +14,8 @@ UCLASS()
 class MHGA_API ALobbyGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+public:
+	ALobbyGameMode();
 
 protected:
 	virtual FString InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal = L"") override;
