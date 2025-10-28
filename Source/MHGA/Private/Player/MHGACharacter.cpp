@@ -13,6 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/InteractComponent.h"
+#include "Player/MHGAPlayerController.h"
 #include "Player/PlayerAnim.h"
 
 AMHGACharacter::AMHGACharacter()
@@ -67,6 +68,9 @@ AMHGACharacter::AMHGACharacter()
 	ConstructorHelpers::FObjectFinder<UInputAction> start(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Start.IA_Start'"));
 	if (crouch.Succeeded())
 		IA_Start = start.Object;
+	ConstructorHelpers::FObjectFinder<UInputAction> voice(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Voice.IA_Voice'"));
+	if (voice.Succeeded())
+		IA_Voice = voice.Object;
 
 
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -91,6 +95,8 @@ void AMHGACharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(IA_Use, ETriggerEvent::Completed, this, &AMHGACharacter::UseInputRelease);
 		EnhancedInputComponent->BindAction(IA_Crouch, ETriggerEvent::Started, this, &AMHGACharacter::CrouchInput);
 		EnhancedInputComponent->BindAction(IA_Start, ETriggerEvent::Started, this, &AMHGACharacter::StartInput);
+		EnhancedInputComponent->BindAction(IA_Voice, ETriggerEvent::Started, this, &AMHGACharacter::StartVoiceInput);
+		EnhancedInputComponent->BindAction(IA_Voice, ETriggerEvent::Completed, this, &AMHGACharacter::EndVoiceInput);
 	}
 }
 
@@ -160,4 +166,16 @@ void AMHGACharacter::StartInput(const FInputActionValue& Value)
 			gm->GameStart();
 		}
 	}
+}
+
+void AMHGACharacter::StartVoiceInput()
+{
+	AMHGAPlayerController* pc = GetController<AMHGAPlayerController>();
+	pc->StartTalking();
+}
+
+void AMHGACharacter::EndVoiceInput()
+{
+	AMHGAPlayerController* pc = GetController<AMHGAPlayerController>();
+	pc->StopTalking();
 }
