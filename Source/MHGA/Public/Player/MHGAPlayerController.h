@@ -76,6 +76,7 @@ private:
 	TMap<FString, FUniqueNetIdRepl> RegisteredRemoteTalkers;
 	FTimerHandle RemoteVoiceRefreshHandle;
 	
+public:
 	// GameOver
 	void Client_HandleGameOver();
 };
