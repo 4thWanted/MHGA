@@ -46,7 +46,7 @@ void ULobbyUI::OnClickReady()
 	if (LobbyBoard->HasAuthority())
 	{
 		PRINTINFO()
-		GetWorld()->ServerTravel(TEXT("/Game/Maps/Main?listen"));
+		GetWorld()->ServerTravel(TEXT("/Game/Maps/Main"), true);
 	}
 }
 
