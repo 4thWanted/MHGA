@@ -32,6 +32,10 @@
 			"Enabled": true
 		},
 		{
+			"Name": "AudioCapture",
+			"Enabled": true
+		},
+		{
 			"Name": "UdpMessaging",
 			"Enabled": false
 		},

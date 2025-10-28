@@ -5,6 +5,7 @@
 #include "Logging/LogMacros.h"
 #include "MHGACharacter.generated.h"
 
+class UVOIPTalker;
 class UWidgetInteractionComponent;
 class UInteractComponent;
 class UInputComponent;
@@ -54,6 +55,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	UWidgetInteractionComponent* WidgetInteraction; //3d widget interact
 
+
 protected:
 	void MoveInput(const FInputActionValue& Value);
 	void LookInput(const FInputActionValue& Value);
@@ -68,4 +70,3 @@ public:
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FPSCamComponent; }
 	UInteractComponent* GetInteractComponent() const {return InteractComponent;}
 };
-

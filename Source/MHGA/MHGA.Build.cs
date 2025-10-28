@@ -23,9 +23,12 @@ public class MHGA : ModuleRules
 			"OnlineSubsystem",
 			"OnlineSubsystemSteam",
 			"OnlineSubsystemUtils",
+			"AudioMixer",
+			"SteamSockets",
+			"AudioCapture",
+			"AudioCaptureCore",
 			"Voice",
 			"VoiceChat",
-			"AudioMixer",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
