@@ -32,24 +32,12 @@ void ACookingArea::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 	// TODO : 튀김기에도 CookingArea 적용해야함. 패티기반으로만 되어있는걸 수정
 	// TODO : 대상 재료 -> 조리 시작 호출
 	/*	p_Patty >> p_IngredientBase
-	 *	p_IngredientBase->UpdateMaterial 유지
-	 *	
 	 *	
 	 */
+	TObjectPtr<AIngredientBase> p_oningredient = Cast<AIngredientBase>(OtherActor);
+	if (p_oningredient)
+		p_oningredient->StartCook();
 	
-	APatty* patty = Cast<APatty>(OtherActor);
-
-	// 패티가 '날것(Raw)' 상태일 때만 상호작용을 시작합니다.
-	if (patty && patty->GetCookState() == EPattyCookState::Raw && !overlapActorTimer.Contains(OtherActor))
-	{
-		FTimerHandle newTimerHandle;
-		FTimerDelegate TimerDelegate;
-		// 첫 번째 타이머는 'CookPatty' 함수를 호출합니다.
-		TimerDelegate.BindUFunction(this, FName("CookPatty"), OtherActor);
-
-		GetWorld()->GetTimerManager().SetTimer(newTimerHandle, TimerDelegate, cookingTime, false);
-		overlapActorTimer.Add(OtherActor, newTimerHandle);
-	}
 }
 
 void ACookingArea::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -58,6 +46,9 @@ void ACookingArea::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* Oth
 	if (!HasAuthority()) return;
 	// TODO : 대상 재료의 조리중지 호출
 	// p_Ing -> ShutdownCook();
+	TObjectPtr<AIngredientBase> p_oningredient = Cast<AIngredientBase>(OtherActor);
+	if (p_oningredient)
+		// p_oningredient->ShutDownCook();
 	
 	// 영역을 나간 액터가 맵에 등록되어 있는지 확인합니다.
 	if (overlapActorTimer.Contains(OtherActor))
