@@ -42,17 +42,35 @@ public:
 	UPROPERTY()
 	AHamburger* curHamburger;
 
+	UPROPERTY()
+	TArray<AHamburger*> curHamburgers;
+
 	// 다른 액터가 이 콜리전 영역에 들어왔을 때 호출될 함수
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
     
 	UFUNCTION()
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-public:
-	/** 구역 안의 음식을 가져갑니다. */
-	AHamburger* TakeFood();
 
-	/** 현재 구역 안에 음식이 있는지 확인합니다. */
-	bool HasFood() const;
+public:
+	// 픽업존에 있는 특정 메뉴의 햄버거 갯수 반환
+	UFUNCTION()
+	int32 GetFoodCountByType(const FString& menuName);
+	// 픽업존에 있는 모든 햄버거의 총 갯수 반환
+	UFUNCTION()
+	int32 GetTotalFoodCount() const;
+	// 픽업존에서 특정 메뉴의 햄버거를 지정된 수량만큼 찾아 가져가는 함수
+	UFUNCTION()
+	void TakeFoodByType(const FString& menuName, int32 menuCount);
+	// 픽업존의 모든 햄버거를 제거하고 파괴하는 함수
+	UFUNCTION()
+	void ClearAllFood();
+
+	
+	// /** 구역 안의 음식을 가져갑니다. */
+	// AHamburger* TakeFood();
+	//
+	// /** 현재 구역 안에 음식이 있는지 확인합니다. */
+	// bool HasFood() const;
 
 };

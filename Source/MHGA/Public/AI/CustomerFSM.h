@@ -101,15 +101,24 @@ public:
 	// 주문한 수량
 	UPROPERTY(VisibleInstanceOnly, Category = "AI Order")
 	int32 orderQuantity = 1;
+	
 	// 주문 대기 시간
 	UPROPERTY(VisibleInstanceOnly, Category = "AI Order")
-	float maxOrderTime = 20.f;
+	float maxOrderTime;
 	float orderTimer = 0.f;
-	// 음식 대기 시간
+	// 성격별 주문 대기 시간
 	UPROPERTY(EditAnywhere, Category = "AI Order")
-	float maxWaitTime = 50.f;
+	TMap<ECustomerPersonality, float> orderTimeMap;
+	
+	// 음식 대기 시간
+	UPROPERTY(VisibleInstanceOnly, Category = "AI Order")
+	float maxWaitTime;
 	float waitingTimer = 0.f;
+	// 성격별 음식 대기 시간
+	UPROPERTY(VisibleInstanceOnly, Category = "AI Order")
+	TMap<ECustomerPersonality, float> waitingTimeMap;
 
+	
 	// == 위치정보 ==
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
 	class ATargetPoint* orderTarget;	// 주문 위치

@@ -247,6 +247,12 @@ void UCustomerFSM::HandleStateEnter(EAIState state)
 	case EAIState::Ordering:
 		{
 			{
+				// 성격별 타이머 설정
+				orderTimer = 0.f;
+				// 맵에서 성격에 맞는 시간 검색
+				float* foundTime = orderTimeMap.Find(personality);
+				// 못찾으면 기본값 15초 설정
+				maxOrderTime = foundTime ? *foundTime : 15.f;
 				UE_LOG(LogTemp, Warning, TEXT("주문중"))
 				StartOrder();
 			}
@@ -255,6 +261,12 @@ void UCustomerFSM::HandleStateEnter(EAIState state)
 
 	case EAIState::WaitingForFood:
 		{
+			// 성격별 타이머 설정
+			waitingTimer = 0.f;
+			// 맵에서 성격에 맞는 시간 검색
+			float* foundTime = waitingTimeMap.Find(personality);
+			// 못찾으면 기본값 15초 설정
+			maxWaitTime = foundTime ? *foundTime : 60.f;
 			StartWandering();
 			break;
 		}

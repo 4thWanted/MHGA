@@ -40,40 +40,94 @@ void APickupZone::Tick(float DeltaTime)
 
 void APickupZone::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// 겹친 액터가 음식(AFoodActor)인지 확인합니다.
-	AHamburger* Food = Cast<AHamburger>(OtherActor);
-	if (IsValid(Food) && !curHamburger)
+	// 겹친 액터가 햄버거인지 확인
+	AHamburger* food = Cast<AHamburger>(OtherActor);
+	
+	if (IsValid(food))
 	{
-		UE_LOG(LogTemp, Log, TEXT("음식이 픽업 존에 놓였습니다: %s"), *Food->GetBurgerName());
-		curHamburger = Food;
-
-		// 손님 자동 호출
-		// TODO : 손님 수동 호출 만들기
-		// if (IsValid(manager))
-		// {
-		// 	manager->OnFoodPlacedInZone(this);
-		// }
+		curHamburgers.AddUnique(food);
+		UE_LOG(LogTemp, Log, TEXT("음식이 픽업 존에 놓였습니다: %s (현재 총 %d개)"), *food->GetBurgerName(), curHamburgers.Num());
+		//curHamburger = food;
 	}
 }
 
 void APickupZone::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex)
 {
-	if (OtherActor == curHamburger)
+	AHamburger* food = Cast<AHamburger>(OtherActor);
+	if (IsValid(food))
 	{
-		curHamburger = nullptr;
+		// 배열에서 나간 햄버거 제거
+		curHamburgers.Remove(food);
+		UE_LOG(LogTemp, Log, TEXT("음식이 픽업존에서 제거됨: %s (현재 총 %d개)"), *food->GetBurgerName(), curHamburgers.Num());
+		
+	}
+	// if (OtherActor == curHamburger)
+	// {
+	// 	curHamburger = nullptr;
+	// }
+}
+
+// AHamburger* APickupZone::TakeFood()
+// {
+// 	AHamburger* FoodToReturn = curHamburger;
+// 	curHamburger = nullptr;
+// 	return FoodToReturn;
+// }
+//
+// bool APickupZone::HasFood() const
+// {
+// 	return IsValid(curHamburger);
+// }
+
+int32 APickupZone::GetFoodCountByType(const FString& menuName)
+{
+	int32 count = 0;
+	for (AHamburger* food : curHamburgers)
+	{
+		if (IsValid(food) && food->GetBurgerName() == menuName)
+		{
+			count++;
+		}
+	}
+	return count;
+}
+
+int32 APickupZone::GetTotalFoodCount() const
+{
+	return curHamburgers.Num();
+}
+
+void APickupZone::TakeFoodByType(const FString& menuName, int32 menuCount)
+{
+	if (!HasAuthority()) return;
+
+	int32 countToRemove = menuCount;
+	// 배열을 뒤에서부터 순회하면 제거해야 안전
+	for (int32 i = curHamburgers.Num() - 1; i >= 0; i--)
+	{
+		AHamburger* food = curHamburgers[i];
+		if (IsValid(food) && food->GetBurgerName() == menuName)
+		{
+			curHamburgers.RemoveAt(i);
+			food->Destroy();
+			countToRemove--;
+
+			if (countToRemove <= 0) break;
+		}
 	}
 }
 
-AHamburger* APickupZone::TakeFood()
+void APickupZone::ClearAllFood()
 {
-	AHamburger* FoodToReturn = curHamburger;
-	curHamburger = nullptr;
-	return FoodToReturn;
-}
+	if (!HasAuthority()) return;
 
-bool APickupZone::HasFood() const
-{
-	return IsValid(curHamburger);
+	for (AHamburger* food : curHamburgers)
+	{
+		if (IsValid(food))
+		{
+			food->Destroy();
+		}
+	}
+	curHamburgers.Empty();
 }
-
