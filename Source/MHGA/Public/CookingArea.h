@@ -19,9 +19,18 @@ public:
 	UFUNCTION()
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	void PlayAlarm();
 
 	/* Field */
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UBoxComponent* boxComp;
+
+	FTimerHandle h_FryTimerHandle;
+
+	UPROPERTY(EditAnywhere)
+	bool b_IsFryMachine = false;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class USoundBase> p_AlarmSound;
 };
