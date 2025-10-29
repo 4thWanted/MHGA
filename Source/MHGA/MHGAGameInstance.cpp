@@ -43,14 +43,17 @@ void UMHGAGameInstance::CreateMySession(FString displayName, int32 playerCount)
 	SessionSettings.bUseLobbiesIfAvailable = true;
 	SessionSettings.bUsesPresence = true;
 
+	SessionSettings.bAllowJoinInProgress = true;
+
 	//세션 검색 허용 여부
 	SessionSettings.bShouldAdvertise = true;
 	//세션 최대 참여 인원 설정
 	//TODO : 호스트는 public connections에 포함되지 않음
-	SessionSettings.NumPublicConnections = playerCount - 1;
+	SessionSettings.NumPublicConnections = playerCount;
 	displayName = StringBase64Encode(displayName);
 	//커스텀 정보	- Key,Value값
 	SessionSettings.Set(FName("NAME"), displayName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	SessionSettings.Set(FName("PlayerCount"), 1, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
 	//sessionSettings 이용해서 세션 생성
 	if (!SessionInterface.IsValid())

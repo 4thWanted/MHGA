@@ -16,6 +16,7 @@ AMHGAGameMode::AMHGAGameMode()
 	PlayerControllerClass = AMHGAPlayerController::StaticClass();
 	GameStateClass = AMHGAGameState::StaticClass();
 
+	bUseSeamlessTravel = true;
 	PrimaryActorTick.bCanEverTick = true;
 }
 
