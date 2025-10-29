@@ -29,16 +29,16 @@ void APatty::BeginPlay()
 	if (pMesh)
 	{
 		// 슬롯0 : 앞면
-		if (pMesh->GetMaterial(0))
-		{
-			frontMaterial = UMaterialInstanceDynamic::Create(pMesh->GetMaterial(0), this);
-			pMesh->SetMaterial(0, frontMaterial);
-		}
-		// 슬롯1 : 뒷면
 		if (pMesh->GetMaterial(1))
 		{
-			backMaterial = UMaterialInstanceDynamic::Create(pMesh->GetMaterial(1), this);
-			pMesh->SetMaterial(1, backMaterial);
+			frontMaterial = UMaterialInstanceDynamic::Create(pMesh->GetMaterial(1), this);
+			pMesh->SetMaterial(1, frontMaterial);
+		}
+		// 슬롯1 : 뒷면
+		if (pMesh->GetMaterial(0))
+		{
+			backMaterial = UMaterialInstanceDynamic::Create(pMesh->GetMaterial(0), this);
+			pMesh->SetMaterial(0, backMaterial);
 		}
 	}
 
@@ -226,40 +226,78 @@ void APatty::UpdateMaterial()
 {
 	// 앞면 색상
 	FLinearColor frontColor;
+	float frontRough = 1.f;
+	TObjectPtr<UTexture2D> frontTexture = nullptr;
+	TObjectPtr<UTexture2D> frontNormal= nullptr;
+	TObjectPtr<UTexture2D> frontORM= nullptr;
+	
 	if (bIsFrontOverCooked)
 	{
 		frontColor = FLinearColor::Black;
+		frontRough = 50.f;
+		frontTexture = cookedTexture;
+		frontNormal = cookedNormal;
+		frontORM = cookedORM;
 	}
 	else if (bIsFrontCooked)
 	{
-		frontColor = FLinearColor(0.125, 0.038, 0.023);
+		frontColor = FLinearColor(1, 1, 1);
+		frontTexture = cookedTexture;
+		frontNormal = cookedNormal;
+		frontORM = cookedORM;
 	}
 	else
 	{
 		frontColor = FLinearColor(1,1,1);
+		frontTexture = rawTexture;
+		frontNormal = rawNormal;
+		frontORM = rawORM;
 	}
 
 	if (frontMaterial)
 	{
 		frontMaterial->SetVectorParameterValue(TEXT("CookingLevel"), frontColor);
+		frontMaterial->SetScalarParameterValue(TEXT("CookingRough"), frontRough);
+		frontMaterial->SetTextureParameterValue(TEXT("BaseTexture"), frontTexture);
+		frontMaterial->SetTextureParameterValue(TEXT("Normal"), frontNormal);
+		frontMaterial->SetTextureParameterValue(TEXT("ORM"), frontORM);
 	}
 
 	// 뒷면 생상
 	FLinearColor backColor;
+	float backRough = 1.f;
+	TObjectPtr<UTexture2D> backTexture = nullptr;
+	TObjectPtr<UTexture2D> backNormal= nullptr;
+	TObjectPtr<UTexture2D> backORM= nullptr;
+	
 	if (bIsBackOverCooked)
 	{
 		backColor = FLinearColor::Black;
+		backRough = 50.f;
+		backTexture = cookedTexture;
+		backNormal = cookedNormal;
+		backORM = cookedORM;
 	}
 	else if (bIsBackCooked)
 	{
-		backColor = FLinearColor(0.125, 0.038, 0.023);
+		backColor = FLinearColor(1, 1, 1);
+		backTexture = cookedTexture;
+		backNormal = cookedNormal;
+		backORM = cookedORM;
 	}
 	else
 	{
 		backColor = FLinearColor(1,1,1);
+		backTexture = rawTexture;
+		backNormal = rawNormal;
+		backORM = rawORM;
 	}
 	if (backMaterial)
 	{
 		backMaterial->SetVectorParameterValue(TEXT("CookingLevel"), backColor);
+		backMaterial->SetScalarParameterValue(TEXT("CookingRough"), backRough);
+		backMaterial->SetTextureParameterValue(TEXT("BaseTexture"), backTexture);
+		backMaterial->SetTextureParameterValue(TEXT("Normal"), backNormal);
+		backMaterial->SetTextureParameterValue(TEXT("ORM"), backORM);
 	}
 }

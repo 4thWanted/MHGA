@@ -98,4 +98,18 @@ public:
 	void UpdateCookState();
 	// 머티리얼 변경 함수
 	void UpdateMaterial();
+
+	// 구운 패티 텍스처
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UTexture2D> rawTexture;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UTexture2D> rawNormal;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UTexture2D> rawORM;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UTexture2D> cookedTexture;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UTexture2D> cookedNormal;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UTexture2D> cookedORM;
 };
