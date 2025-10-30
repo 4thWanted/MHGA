@@ -106,7 +106,7 @@ ATargetPoint* ACustomerManager::RequestWaitingPoint(ACustomerAI* customer)
 
 ATargetPoint* ACustomerManager::RequestPickupPoint()
 {
-	return pickupPoints[0];
+	return pickupPoint;
 }
 
 ATargetPoint* ACustomerManager::RequestExitPoint()
@@ -152,7 +152,8 @@ void ACustomerManager::UpdateWaitingPosition()
 				{
 					customerToMove->fsm->orderTarget = waitingPoints[i - 1];
 					// 해당 위치로 이동
-					customerToMove->fsm->MoveToTarget(waitingPoints[i-1]);
+					customerToMove->fsm->SetState(EAIState::GoingToLine);
+					//customerToMove->fsm->MoveToTarget(waitingPoints[i-1]);
 				}
 				// 배열에서도 앞당기기
 				waitingCustomers[i -1] = waitingCustomers[i];

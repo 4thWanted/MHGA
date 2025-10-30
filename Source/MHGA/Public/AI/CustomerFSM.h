@@ -73,9 +73,8 @@ public:
 	int32 SelectedMeshIndex = 0;
 	UFUNCTION()
 	void OnRep_MeshIndex();
+
 	
-
-
 	
 	void SetState(EAIState NewState);
 	UFUNCTION()
@@ -120,13 +119,13 @@ public:
 
 	
 	// == 위치정보 ==
-	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	UPROPERTY()
 	class ATargetPoint* orderTarget;	// 주문 위치
 
-	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	UPROPERTY()
 	class ATargetPoint* pickupTarget;	// 음식 수령 위치
 
-	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	UPROPERTY()
 	class ATargetPoint* exitTarget;		// 퇴장 위치
 
 public:
