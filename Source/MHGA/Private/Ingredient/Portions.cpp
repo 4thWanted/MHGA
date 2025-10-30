@@ -91,12 +91,12 @@ void APortions::UpdateMaterial()
 
 	if (b_IsShanghai && !b_IsShrimp)
 	{
-		m_Material->SetVectorParameterValue(TEXT("CookingLevel"), FLinearColor(0.25, 0.5, 0.3));
+		m_Material->SetVectorParameterValue(TEXT("CookingLevel"), FLinearColor(0, 0, 0));
 		GetMeshComp()->SetMaterial(0, m_Material);
 	}
 	else if (b_IsShrimp && !b_IsShanghai)
 	{
-		m_Material->SetVectorParameterValue(TEXT("CookingLevel"), FLinearColor(0.7, 0.35, 0.3));
+		m_Material->SetVectorParameterValue(TEXT("CookingLevel"), FLinearColor(0, 0, 0));
 		GetMeshComp()->SetMaterial(0, m_Material);
 	}
 	else
