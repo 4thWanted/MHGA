@@ -20,6 +20,7 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
+	
 	virtual void OnGrabbed(AMHGACharacter* Player) override;
 	virtual void OnPut() override;
 	virtual void OnUse() override;

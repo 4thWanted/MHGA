@@ -9,7 +9,8 @@ ASauceBottle::ASauceBottle()
 	PrimaryActorTick.bCanEverTick = true;
 
 	IngType = EIngredient::None;
-
+	bReplicates = true;
+	
 	Arrow = CreateDefaultSubobject<UArrowComponent>(TEXT("Arrow"));
 	Arrow->SetupAttachment(GetRootComponent());
 	Arrow->SetRelativeLocation(FVector(0, 0, 30));
@@ -28,6 +29,8 @@ void ASauceBottle::OnGrabbed(AMHGACharacter* Player)
 	Super::OnGrabbed(Player);
 
 	bGrabbed = true;
+	if (bGrabbed)
+		this->SetActorRotation(FRotator(-180, 0 ,0));
 }
 
 void ASauceBottle::OnPut()
@@ -35,6 +38,8 @@ void ASauceBottle::OnPut()
 	Super::OnPut();
 
 	bGrabbed = false;
+	if (!bGrabbed)
+		this->SetActorRotation(FRotator::ZeroRotator);
 }
 
 void ASauceBottle::OnUse()
@@ -42,15 +47,13 @@ void ASauceBottle::OnUse()
 	Super::OnUse();
 
 	ShootSauce();
-	
 }
 
 void ASauceBottle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bGrabbed)
-		this->SetActorRotation(FRotator(-180, 0 ,0));
+	
 }
 
 void ASauceBottle::ShootSauce()
@@ -73,7 +76,6 @@ void ASauceBottle::ShootSauce()
 			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, name, true);
 		}
 		FVector SpawnLoc = HitResult.ImpactPoint + FVector(0, 0, 20);
-		UE_LOG(LogTemp, Warning, TEXT("%f, %f, %f"), SpawnLoc.X, SpawnLoc.Y, SpawnLoc.Z);
 		auto Sauce = GetWorld()->SpawnActor(SauceClass, &SpawnLoc, &FRotator::ZeroRotator);
 	}
 }

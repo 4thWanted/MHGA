@@ -15,9 +15,6 @@ UInteractComponent::UInteractComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
-	//m_preview_mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PreviewMesh"));
-	//m_preview_mesh->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
-	//m_preview_mesh->SetVisibility(false);
 }
 
 void UInteractComponent::BeginPlay()
@@ -109,16 +106,6 @@ void UInteractComponent::MulticastRPC_GrabProps_Implementation(FHitResult Hit)
 	
 	GrabInterface->SetLocation(Owner->GetFirstPersonCameraComponent()->GetComponentLocation() + Owner->GetFirstPersonCameraComponent()->GetForwardVector() * HoldDistance);
 
-	// /* dove */
-	// IGrabableProps* pgrab = Cast<IGrabableProps>(Hit.GetActor());
-	// if (!pgrab) return;
-	// UStaticMeshComponent* p_hitactor_meshcomp = pgrab->GetMeshComp();
-	// if (!p_hitactor_meshcomp) return;
-	// m_preview_mesh->SetStaticMesh(p_hitactor_meshcomp->GetStaticMesh());
-	// m_preview_mesh->SetVisibility(true);
-	// p_hitactor_meshcomp->SetVisibility(false);
-	// /* dove */
-
 	bIsGrabbed = true;
 	GrabbedProp = GrabInterface;
 	GrabbedActor = Hit.GetActor();
@@ -147,10 +134,6 @@ void UInteractComponent::PutProps()
 {
 	if (GrabbedProp)
 	{
-		/* dove */
-		//m_preview_mesh->SetVisibility(false);
-		
-		
 		GrabbedProp->OnPut();
 
 		AActor* P = Cast<AActor>(GrabbedProp);
@@ -162,8 +145,6 @@ void UInteractComponent::PutProps()
 			if (AIngredientBase* p_ing = Cast<AIngredientBase>(P))
 				p_ing->GetMeshComp()->SetVisibility(true);
 			P->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-			//P->SetActorLocation(m_preview_mesh->GetComponentLocation());
-			//m_preview_mesh->SetStaticMesh(nullptr);
 		}
 
 		bIsGrabbed = false;
