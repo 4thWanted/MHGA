@@ -100,7 +100,7 @@ public:
 	EBurgerMenu orderedMenu;
 	// 주문한 수량
 	UPROPERTY(VisibleInstanceOnly, Category = "AI Order")
-	int32 orderQuantity = 1;
+	int32 orderCount = 1;
 	
 	// 주문 대기 시간
 	UPROPERTY(VisibleInstanceOnly, Category = "AI Order")
@@ -170,9 +170,6 @@ public:
 
 	UFUNCTION()
 	void ExitStore();
-
-	UFUNCTION()
-	void OnCalledToPickup();
 	
 	UFUNCTION()
 	void MoveToTarget(const ATargetPoint* target);

@@ -123,7 +123,7 @@ void ACustomerManager::OnCustomerFinished(ACustomerAI* customer)
 		if (waitingCustomers[i] == customer)
 		{
 			// pickupCustomers.Add(customer);
-			// // 손님 배열 지우기
+			// 손님 배열 지우기
 			waitingCustomers[i] = nullptr;
 			break;
 		}
