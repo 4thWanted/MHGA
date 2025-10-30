@@ -66,7 +66,7 @@ public:
 	TArray<ATargetPoint*> waitingPoints;
 	// 픽업 위치
 	UPROPERTY(EditAnywhere, Category = "Waiting Order")
-	TArray<ATargetPoint*> pickupPoints;
+	class ATargetPoint* pickupPoint;
 	
 	// 줄에서 대기중인 손님열
 	UPROPERTY(EditAnywhere, Category = "Waiting Order", Replicated)

@@ -134,26 +134,21 @@ void UCustomerFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 			SetState(EAIState::Exit);
 		}
 	}
-
-
-	if (curState == EAIState::GoingToPickup)
-	{
-		if (FVector::Dist2D(me->GetActorLocation() , manager->pickupPoints[0]->GetActorLocation()) <= 100)
-		{
-			SetState(EAIState::WaitingForPickup);
-		}
-	}
-
-	if (curState == EAIState::WaitingForFood)
-	{
-		
-	}
-
-	if (curState == EAIState::Exit)
-	if (FVector::Dist2D(me->GetActorLocation() , manager->spawnPoint->GetActorLocation()) <= 100)
-	{
-		me->Destroy();
-	}
+	//
+	//
+	// if (curState == EAIState::GoingToPickup)
+	// {
+	// 	if (FVector::Dist2D(me->GetActorLocation() , manager->pickupPoints[0]->GetActorLocation()) <= 100)
+	// 	{
+	// 		SetState(EAIState::WaitingForPickup);
+	// 	}
+	// }
+	//
+	// if (curState == EAIState::Exit)
+	// if (FVector::Dist2D(me->GetActorLocation() , manager->spawnPoint->GetActorLocation()) <= 100)
+	// {
+	// 	me->Destroy();
+	// }
 }
 
 void UCustomerFSM::OnRep_MeshIndex()
@@ -278,6 +273,8 @@ void UCustomerFSM::HandleStateEnter(EAIState state)
 			{
 				MoveToTarget(pickupTarget);
 				UE_LOG(LogTemp, Log, TEXT("픽업하러 이동중"));
+				AIController->GetPathFollowingComponent()->OnRequestFinished.AddUObject(this, &UCustomerFSM::OnMoveToTargetCompleted);
+				
 			}
 			break;
 		}
@@ -314,52 +311,6 @@ void UCustomerFSM::Server_EnterStore_Implementation()
 	else
 	{
 		SetState(EAIState::Wandering);
-	}
-}
-
-void UCustomerFSM::StartWandering()
-{
-	// 배회를 시작할 때, MoveToRandomLocation 함수를 "즉시" 한 번 호출하고,
-	// 그 후 3~5초마다 반복해서 호출하도록 타이머를 설정합니다.
-	// 마지막 파라미터 true가 반복, -1.f는 첫 호출 지연 없음(즉시 실행)을 의미합니다.
-	
-	GetWorld()->GetTimerManager().SetTimer(
-		wanderTimerHandle, 
-		this, 
-		&UCustomerFSM::MoveToRandomLocation, 
-		FMath::RandRange(3.0f, 5.0f), 
-		true, 
-		0.0f
-	);
-}
-
-void UCustomerFSM::StopWandering()
-{
-	GetWorld()->GetTimerManager().ClearTimer(wanderTimerHandle);
-}
-
-bool UCustomerFSM::GetRandomPositionInNavMesh(const FVector& centerPos, const float radius, FVector& dest)
-{
-	// 네비게이션 시스템 가져오기
-	auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
-	// 랜덤 위치 가져오기
-	FNavLocation loc;
-	bool bResult = ns->GetRandomReachablePointInRadius(centerPos, radius, loc);
-	dest = loc.Location;
-	return bResult;
-}
-
-
-void UCustomerFSM::MoveToRandomLocation()
-{
-	if (!IsValid(AIController) || !GetOwner()) return;
-	
-	if (GetOwner() && GetRandomPositionInNavMesh(GetOwner()->GetActorLocation(), 500, randomPos))
-	{
-		if (AIController)
-		{
-			AIController->MoveToLocation(randomPos);
-		}
 	}
 }
 
@@ -627,6 +578,11 @@ void UCustomerFSM::ExitStore()
 	if (exitTarget)
 	{
 		MoveToTarget(exitTarget);
+		if (AIController)
+		{
+			AIController->GetPathFollowingComponent()->OnRequestFinished.AddUObject(this, &UCustomerFSM::OnMoveToTargetCompleted);
+		}
+		
 		GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
 		if (manager)
 		{
@@ -643,32 +599,151 @@ void UCustomerFSM::MoveToTarget(const ATargetPoint* target)
 	}
 }
 
+void UCustomerFSM::StartWandering()
+{
+	// 배회를 시작할 때, MoveToRandomLocation 함수를 "즉시" 한 번 호출하고,
+	// 그 후 3~5초마다 반복해서 호출하도록 타이머를 설정합니다.
+	// 마지막 파라미터 true가 반복, -1.f는 첫 호출 지연 없음(즉시 실행)을 의미합니다.
+	
+	GetWorld()->GetTimerManager().SetTimer(
+		wanderTimerHandle, 
+		this, 
+		&UCustomerFSM::MoveToRandomLocation, 
+		FMath::RandRange(3.0f, 5.0f), 
+		true, 
+		0.0f
+	);
+}
+
+void UCustomerFSM::StopWandering()
+{
+	GetWorld()->GetTimerManager().ClearTimer(wanderTimerHandle);
+}
+
+bool UCustomerFSM::GetRandomPositionInNavMesh(const FVector& centerPos, const float radius, FVector& dest)
+{
+	// 네비게이션 시스템 가져오기
+	auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	// 랜덤 위치 가져오기
+	FNavLocation loc;
+	bool bResult = ns->GetRandomReachablePointInRadius(centerPos, radius, loc);
+	dest = loc.Location;
+	return bResult;
+}
+
+
+void UCustomerFSM::MoveToRandomLocation()
+{
+	if (!IsValid(AIController) || !GetOwner()) return;
+	
+	if (GetOwner() && GetRandomPositionInNavMesh(GetOwner()->GetActorLocation(), 500, randomPos))
+	{
+		if (AIController)
+		{
+			AIController->MoveToLocation(randomPos);
+		}
+	}
+}
+
 void UCustomerFSM::OnMoveToTargetCompleted(FAIRequestID id, const FPathFollowingResult& result)
 {
 	// 서버에서만 실행되게
 	if (!GetOwner()->HasAuthority()) return;
-	// 줄서러 가는중 or 줄서기중이 아니면 함수 탈출
-	if (curState != EAIState:: GoingToLine && curState != EAIState::WaitingInLine) return;
+	
+	// 콜백이 여러 번 실행되지 않도록 즉시 바인딩 해제
+	if (AIController)
+	{
+		AIController->GetPathFollowingComponent()->OnRequestFinished.RemoveAll(this);
+	}
+	
+	// 이동 실패 시
+	if (!result.IsSuccess())
+	{
+		// 줄 서기 실패 시에만 다시 시도
+		if (curState == EAIState::GoingToLine)
+		{
+			UE_LOG(LogTemp, Error, TEXT("이동 실패, 다시 대기열 요청"));
+			EnterStore();
+		}
+		else // 픽업/퇴장 실패 시 그냥 퇴장 처리
+		{
+			UE_LOG(LogTemp, Error, TEXT("이동 실패: %s. 강제 퇴장."), *result.ToString());
+			if (curState != EAIState::Exit)
+			{
+				SetState(EAIState::Exit); // Exit가 아니었다면 Exit로 변경
+			}
+			else
+			{
+				me->Destroy(); // 이미 Exit 중이었다면 그냥 파괴
+			}
+		}
+		return;
+	}
 
-	// 목적지 도착 성공시
-	// if (result.Code == EPathFollowingResult::Success)
-	if (result.IsSuccess())
+	// 이동 성공 시
+	switch (curState)
 	{
-		if (orderTarget && manager && orderTarget == manager->waitingPoints[0])
+	case EAIState::GoingToLine:
+	case EAIState::WaitingInLine: // (이미 줄 서는 중에 앞당기는 경우)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("도착, 주문 시작"));
-			SetState(EAIState::Ordering);
+			if (orderTarget && manager && orderTarget == manager->waitingPoints[0])
+			{
+				UE_LOG(LogTemp, Warning, TEXT("도착, 주문 시작"));
+				SetState(EAIState::Ordering);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Log, TEXT("도착, 줄서서 대기"));
+				SetState(EAIState::WaitingInLine);
+			}
+			break;
 		}
-		else
+
+	case EAIState::GoingToPickup:
 		{
-			UE_LOG(LogTemp, Log, TEXT("도착, 줄서서 대기"));
-			SetState(EAIState::WaitingInLine);
+			UE_LOG(LogTemp, Log, TEXT("픽업대 도착, 음식 확인."));
+			SetState(EAIState::WaitingForPickup); // (도착했으니 CheckAndTakeFood 실행)
+			break;
+		}
+
+	case EAIState::Exit:
+		{
+			UE_LOG(LogTemp, Log, TEXT("출구 도착, 손님 파괴."));
+			me->Destroy(); // (Tick에서 하던 파괴 로직을 여기서 실행)
+			break;
+		}
+
+	default:
+		{
+			UE_LOG(LogTemp, Warning, TEXT("OnMoveToTargetCompleted: 알 수 없는 상태에서 도착함."));
+			break;
 		}
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("이동 실패, 다시 대기열 요청"));
-		EnterStore();
-	}
+
+
+	
+	// // 줄서러 가는중 or 줄서기중이 아니면 함수 탈출
+	// if (curState != EAIState:: GoingToLine && curState != EAIState::WaitingInLine) return;
+	//
+	// // 목적지 도착 성공시
+	// // if (result.Code == EPathFollowingResult::Success)
+	// if (result.IsSuccess())
+	// {
+	// 	if (orderTarget && manager && orderTarget == manager->waitingPoints[0])
+	// 	{
+	// 		UE_LOG(LogTemp, Warning, TEXT("도착, 주문 시작"));
+	// 		SetState(EAIState::Ordering);
+	// 	}
+	// 	else
+	// 	{
+	// 		UE_LOG(LogTemp, Log, TEXT("도착, 줄서서 대기"));
+	// 		SetState(EAIState::WaitingInLine);
+	// 	}
+	// }
+	// else
+	// {
+	// 	UE_LOG(LogTemp, Error, TEXT("이동 실패, 다시 대기열 요청"));
+	// 	EnterStore();
+	// }
 }
 
