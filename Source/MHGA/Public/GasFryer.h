@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Net/UnrealNetwork.h"
 #include "GasFryer.generated.h"
 
 UCLASS()
@@ -42,10 +43,15 @@ public:
 	FVector upPosR;
 	FTimerHandle cookTimer;
 
-	bool bIsMovingDonw = false;
+	bool bIsMovingDown = false;
 	bool bIsMovingUp = false;
 	float movementStartTime = 0;
 
 	void StartCooking();
 	void OnCookingFinished();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_MovingUp();
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_MovingDown();
 };
