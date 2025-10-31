@@ -4,13 +4,17 @@
 #include "GameFramework/Actor.h"
 #include "CookingArea.generated.h"
 
+class UMHGAGameInstance;
+
 UCLASS()
 class MHGA_API ACookingArea : public AActor
 {
 	GENERATED_BODY()
 
 	/* Method */
-public:	
+public:
+	virtual void BeginPlay() override;
+	
 	ACookingArea();
 	
 	UFUNCTION()
@@ -39,4 +43,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	int32 m_nFryTime = 30;
+
+	UPROPERTY(EditAnywhere)
+	UMHGAGameInstance* GI;
 };
