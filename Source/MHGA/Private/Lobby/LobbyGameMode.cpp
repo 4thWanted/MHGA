@@ -15,10 +15,27 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "GameFramework/PlayerController.h"
 #include "Lobby/LobbyPlayerState.h"
-#include "Online/OnlineSessionNames.h"
+#include "Player/MHGACharacter.h"
 
 ALobbyGameMode::ALobbyGameMode()
 {
+	ConstructorHelpers::FClassFinder<AMHGACharacter> ch(TEXT("/Script/Engine.Blueprint'/Game/Blueprints/Player/BP_Player.BP_Player_C'"));
+	if (ch.Succeeded())
+	{
+		DefaultPawnClass = ch.Class;
+		characterList.Add(ch.Class);
+	}
+	ConstructorHelpers::FClassFinder<AMHGACharacter> ch2(TEXT("/Script/Engine.Blueprint'/Game/Blueprints/Player/BP_Player2.BP_Player2_C'"));
+	if (ch2.Succeeded())
+		characterList.Add(ch2.Class);
+	ConstructorHelpers::FClassFinder<AMHGACharacter> ch3(TEXT("/Script/Engine.Blueprint'/Game/Blueprints/Player/BP_Player3.BP_Player3_C'"));
+	if (ch3.Succeeded())
+		characterList.Add(ch3.Class);
+	ConstructorHelpers::FClassFinder<AMHGACharacter> ch4(TEXT("/Script/Engine.Blueprint'/Game/Blueprints/Player/BP_Player4.BP_Player4_C'"));
+	if (ch4.Succeeded())
+		characterList.Add(ch4.Class);
+	
+	
 	bUseSeamlessTravel = true;
 	GameSessionClass = AGameSession::StaticClass();
 	PlayerStateClass = ALobbyPlayerState::StaticClass();
@@ -75,6 +92,30 @@ void ALobbyGameMode::Logout(AController* Exiting)
 	
 	if (HasAuthority())
 		UpdatePlayerCount();
+}
+
+APawn* ALobbyGameMode::SpawnDefaultPawnAtTransform_Implementation(AController* NewPlayer,
+	const FTransform& SpawnTransform)
+{
+	FActorSpawnParameters SpawnInfo;
+	SpawnInfo.Instigator = GetInstigator();
+	SpawnInfo.ObjectFlags |= RF_Transient;	// We never want to save default player pawns into a map
+	UClass* PawnClass = GetDefaultPawnClassForController(NewPlayer);
+
+	//플레이어가 선택한 캐릭터를 pawnclass에 설정
+	FString playerName = NewPlayer->PlayerState->GetPlayerName();
+	int32 charracterIdx = GetGameInstance<UMHGAGameInstance>()->GetSelectCharacter(playerName);
+	if (charracterIdx != -1)
+	{
+		PawnClass = characterList[charracterIdx];
+	}
+	
+	APawn* ResultPawn = GetWorld()->SpawnActor<APawn>(PawnClass, SpawnTransform, SpawnInfo);
+	if (!ResultPawn)
+	{
+		UE_LOG(LogGameMode, Warning, TEXT("SpawnDefaultPawnAtTransform: Couldn't spawn Pawn of type %s at %s"), *GetNameSafe(PawnClass), *SpawnTransform.ToHumanReadableString());
+	}
+	return ResultPawn;
 }
 
 void ALobbyGameMode::UpdatePlayerCount()
