@@ -1,5 +1,6 @@
 #include "CookingArea.h"
 
+#include "GasFryer.h"
 #include "MHGA.h"
 #include "Components/BoxComponent.h"
 #include "Ingredient/Patty.h"
@@ -33,6 +34,7 @@ void ACookingArea::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 
 	if (b_IsFryMachine)
 	{
+		myGasFryer->StartCooking();
 		if (!GetWorld()->GetTimerManager().IsTimerActive(h_FryTimerHandle))
 		GetWorld()->GetTimerManager().SetTimer(h_FryTimerHandle, this, &ACookingArea::PlayAlarm, m_nFryTime, false);
 	}
