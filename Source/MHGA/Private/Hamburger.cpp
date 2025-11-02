@@ -27,11 +27,9 @@ void AHamburger::BeginPlay()
 	TObjectPtr<UStaticMeshComponent> pMesh = GetMeshComp();
 	if (pMesh)
 	{
-		frontMaterial = UMaterialInstanceDynamic::Create(pMesh->GetMaterial(0), this);
-		pMesh->SetMaterial(0, frontMaterial);
-		
+		burgerMaterial = UMaterialInstanceDynamic::Create(pMesh->GetMaterial(0), this);
+		pMesh->SetMaterial(0, burgerMaterial);
 	}
-
 }
 
 void AHamburger::Tick(float DeltaTime)
@@ -86,15 +84,27 @@ void AHamburger::SetMat(const FString& Name)
 {
 	if (Name == "WrongBurger")
 	{
-		frontMaterial->SetTextureParameterValue(TEXT("BurgerName"), wrongTexture);
+		burgerMaterial->SetTextureParameterValue(TEXT("BurgerName"), wrongTexture);
 	}
 	else if (Name == "Shrimp")
 	{
-		frontMaterial->SetTextureParameterValue(TEXT("BurgerName"), shrimpTexture);
+		burgerMaterial->SetTextureParameterValue(TEXT("BurgerName"), shrimpTexture);
+	}
+	else if (Name == "Shanghai")
+	{
+		burgerMaterial->SetTextureParameterValue(TEXT("BurgerName"), shanghaiTexture);
+	}
+	else if (Name == "BTD")
+	{
+		burgerMaterial->SetTextureParameterValue(TEXT("BurgerName"), btdTexture);
+	}
+	else if (Name == "QPC")
+	{
+		burgerMaterial->SetTextureParameterValue(TEXT("BurgerName"), qpcTexture);
 	}
 	else if (Name == "BigMac")
 	{
-		frontMaterial->SetTextureParameterValue(TEXT("BurgerName"), bigMacTexture);
+		burgerMaterial->SetTextureParameterValue(TEXT("BurgerName"), bigMacTexture);
 	}
 }
 

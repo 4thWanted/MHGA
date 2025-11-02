@@ -33,7 +33,7 @@ public:
 	
 	// 버거 외형 텍스처
 	UPROPERTY()
-	TObjectPtr<UMaterialInstanceDynamic> frontMaterial;
+	TObjectPtr<UMaterialInstanceDynamic> burgerMaterial;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UTexture2D> wrongTexture;
@@ -41,6 +41,12 @@ public:
 	TObjectPtr<UTexture2D> shrimpTexture;
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UTexture2D> bigMacTexture;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UTexture2D> btdTexture;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UTexture2D> shanghaiTexture;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UTexture2D> qpcTexture;
 
 	FString GetBurgerName();
 
