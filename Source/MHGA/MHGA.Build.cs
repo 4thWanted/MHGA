@@ -23,9 +23,10 @@ public class MHGA : ModuleRules
 			"OnlineSubsystem",
 			"OnlineSubsystemSteam",
 			"OnlineSubsystemUtils",
+			"Niagara"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { "LevelSequence", "MovieScene" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "LevelSequence", "MovieScene", "Niagara", "Niagara", "Niagara" });
 
 		PublicIncludePaths.AddRange(new string[] {
 			"MHGA",
