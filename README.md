@@ -1929,16 +1929,6 @@ Source/MHGA/
     └── [대응되는 .cpp 파일들]
 ```
 
----
-
-## Members
-- 김홍범
-- 황규환
-- 허지웅
-
-
----
-
 ## 📜 라이선스
 
 Copyright Epic Games, Inc. All Rights Reserved.
